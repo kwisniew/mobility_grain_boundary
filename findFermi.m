@@ -1,10 +1,10 @@
-function Ef=findFermi(Na)
+function Ef=findFermi(Na, T, delta, L, Qt)
     
     q=1.6021766208*10^(-19);
-    T=300;%K
+%     T=300;%K
     eps = 13*8.85*10^-12;%A^2 s^4 / kh m^3 
     epsR = 12;
-    L=1e-6;%m
+%     L=1e-6;%m
     Vb = q*Na*L^2/(8*eps*epsR);
     Ef = fzero(@charge_neut_cond,-q*Vb);
     
@@ -21,14 +21,14 @@ function Ef=findFermi(Na)
         %szerokoœæ ziarna:
         L=1e-6;%m
         %szerokoœc granicy miêdzy ziarnami:
-        delta=1e-7;%m  
+%         delta=1e-7;%m  
         deltaE = 0.05*q;
 
         W = sqrt(2*eps*epsR*Vb/(q*Na));
         Et=0.01*q;
         delta_Et = 0.08*q;
         delta_eps = delta_Et/(2*sqrt( log(2) ));
-        Qt=1e12*1e4;
+%         Qt=1e12*1e4;
 
         
         b1 = (q*Ef+Et+q*Vb)/(k*T);                                       

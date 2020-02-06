@@ -1,13 +1,13 @@
-function W=findW(Na)
+function W=findW(Na, T, delta, L, Qt)
 
-    L=1e-6;%m
+%     L=1e-6;%m
     
     W = fzero(@charge_neut_cond,L/2);
     
     function cnc_expression = charge_neut_cond(W)
         
         q=1.6021766208*10^(-19);
-        T=300;%K
+%         T=300;%K
         eps = 13*8.85*10^-12;%A^2 s^4 / kh m^3 
         epsR = 12;
         k = 1.38064852*10^(-23); %J/K
@@ -22,13 +22,13 @@ function W=findW(Na)
         %szerokoœæ ziarna:
         L=1e-6;%m
         %szerokoœc granicy miêdzy ziarnami:
-        delta=1e-7;%m  
+%         delta=1e-7;%m  
         deltaE = 0.05*q;
 
         Et=0.01*q;
         delta_Et = 0.08*q;
         delta_eps = delta_Et/(2*sqrt( log(2) ));
-        Qt=1e12*1e4;
+%         Qt=1e12*1e4;
 
         Vb = q*Na*W^2/(2*eps*epsR);
         b1 = (q*Ef+Et+q*Vb)/(k*T);                                       

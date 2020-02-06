@@ -1,4 +1,7 @@
 %PARAMETRY
+%TYLKO KILKA PARAMETRÓW WYSTÊPUJE JAKO ZMIENNA W OBLICZENIACH
+%S¥ TO: "Na", "Qt", "T", "delta" i "L"
+
     %Sta³e Fizyczne
     %sta³a boltzmana
     k = 1.38064852*10^(-23); %J/K
@@ -48,9 +51,9 @@
     
     %parametry ogólne
     %temperatura
-    T=300;%K
+    T=120;%K
     %szerokoœæ ziarna
-    L=3e-6;%m
+    L=1e-6;%m
     %szerokoœæ granicy ziarna
     delta=1e-7;%m
     
@@ -77,33 +80,14 @@
     uhop = u0*exp(-(H/(k*T))); %m/Vs
     % ruchliwoœæ dziór na granicy ziarna, Appendix
     ugb = gamma*uext+(1-gamma)*uhop;
-
+    % gêstoœæ przestrzenna ³adunku 
+    Qt=5e12*1e4;
+    
+    %chcemy zobaczyæ zmiennoœc wzglêdem "Na", "T" oraz "delta",
+    %ewentualnie "L"
   
-    %szerokoœæ warstwy zubo¿onej granicy ziaren
-    W = sqrt(2*eps*epsR*Vb/(q*Na));
     
-    %Fgb
-    Fgb = (delta/L)*(uc/ugb)*(p_L2/pgb);
-    
-    %Fc0
-    Fc = 1- 2*W/L + ( (2*W-delta)/L )* exp( q*Vb/(k*T) )*dawson( sqrt(q*Vb/(k*T)) )/ sqrt(q*Vb/(k*T));
-    
-    %ruchliwoœæ z lotu ptaka
-    u = uc/(Fgb + Fc);
-    
-    %chcemy zobaczyæ zmiennoœc wzglêdem "Na", "Vb" oraz "delta"
-    % Od Vb zale¿y "pgb", "W" oraz "Fc"
-    % Od Na zale¿y jedynie "W" --> uznajê, ¿e "p" równie¿ równa siê "Na"
-    % Od delty zale¿y "Fgb" oraz "Fc"
-  
-    fprintf('Gêstoœæ noœników na granicy ziarna:  %e cm^-3\n', pgb_fun(p_L2,Vb,deltaE,T)/1e6);
-    fprintf('Warstwa zubo¿ona:  %f um\n', W_fun(eps,epsR,Vb,Na)*1e6);
-    fprintf('Fc: %f\n', Fc_fun(W,L,delta,Vb,T));
-    fprintf('Fgb: %f\n', Fgb_fun(delta,L,uc,ugb,p_L2,pgb));
-    fprintf('u = %f cm^2/Vs\n', u_fun(uc,Fgb,Fc)*1e4);
-
-    
-%ZNALEZIENIE Ef NUMERYCZNIE    
+%OBLICZENIA NUMERYCZNIE    
     %zmienne do obliczenia przy danym Na:
     % p_L2, pgb, Ef (fermi level), Vb, delta_Qt oraz W (dla przypadku, gdy ziarno ju¿ nie jest ca³kowicie zubo¿one)
 
@@ -124,7 +108,7 @@
 %     i=1;
 %     is_fermi_small_enough = true;
 %     while i <= length(Na) && is_fermi_small_enough == true
-%         Ef(i)   = findFermi(Na(i));
+%         Ef(i)   = findFermi(Na(i), T, delta, L, Qt);
 %         p_L2(i) = p_L2_fun(ni,Ef(i),T);
 %         W(i)    = L/2;
 %         Vb(i)   = Vb_fun(Na(i),W(i));
@@ -142,7 +126,7 @@
 %         while i <= length(Na) && is_fermi_small_enough == true
 %             Ef(i)   = Fermi_graniczny(i);
 %             p_L2(i) = p_L2_fun(ni,Ef(i),T);
-%             W(i)    = findW(Na(i));
+%             W(i)    = findW(Na(i), T, delta, L, Qt);
 %             Vb(i)   = Vb_fun(Na(i),W(i));
 %             pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
 % 
@@ -162,7 +146,7 @@ while i > 0 && is_W_small_enough == true
     
     Ef(i)   = Fermi_graniczny(i);
     p_L2(i) = p_L2_fun(ni,Ef(i),T);
-    W(i)    = findW(Na(i));
+    W(i)    = findW(Na(i), T, delta, L, Qt);
     Vb(i)   = Vb_fun(Na(i),W(i));
     pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
 
@@ -176,7 +160,7 @@ end
 if is_W_small_enough == false
     i=i+1;
     while i > 0
-        Ef(i)   = findFermi(Na(i));
+        Ef(i)   = findFermi(Na(i), T, delta, L, Qt);
         p_L2(i) = p_L2_fun(ni,Ef(i),T);
         W(i)    = L/2;
         Vb(i)   = Vb_fun(Na(i),W(i));
@@ -202,33 +186,7 @@ title('Warstwa zubo¿ona ~ domieszkowania')
 
 subplot(1,3,3)
 loglog(Na/1e6,Ef)
-title('Poziom Fermiego ~ domieszkowania')
-                
-% u_fun(uc, ...
-%       Fgb_fun(delta,L,uc,ugb,p_L2(1),pgb(1)), ...
-%       Fc_fun(W(1),L,delta,Vb(1),T))*1e4  
-
-
-%     Vb_x = [0.01:0.01:0.35];
-%     tmp = u_fun(uc,Fgb,Fc_fun(W_fun(eps,epsR,Vb_x,Na),L,delta,Vb,T))*1e4;
-%     %plot(Vb_x,   u_fun(uc,Fgb,Fc_fun(W_fun(eps,epsR,Vb_x,Na),L,delta,Vb,T))*1e4   )
-%     plot(Vb_x,u_fun(uc, ...
-%                     Fgb_fun(delta,L,uc,ugb,p_L2,pgb_fun(p_L2,Vb_x,deltaE,T)), ...
-%                     Fc_fun(W_fun(eps,epsR,Vb_x,Na),L,delta,Vb_x,T))*1e4)
-                
-   %figure
-   %semilogy(Vb_x,u_fun(uc, ...
-   %                    Fgb_fun(delta,L,uc,ugb,p,pgb_fun(p,Vb_x,deltaE,T)), ...
-   %                    Fc_fun(W_fun(eps,epsR,Vb_x,Na),L,delta,Vb_x,T))*1e4)
-            
-%     Na_x = [1e21:1e21:1e23];
-%     plot(Na_x,u_fun(uc, ...
-%                     Fgb_fun(delta,L,uc,ugb,Na_x,pgb_fun(Na_x,Vb,deltaE,T)), ...
-%                     Fc_fun(W_fun(eps,epsR,Vb,Na_x),L,delta,Vb,T))*1e4)
-%                 
-%     plot(Na_x,pgb_fun(Na_x,Vb,deltaE,T))
-%     plot(Na_x,Fc_fun(W_fun(eps,epsR,Vb,Na_x),L,delta,Vb,T))
-%     plot(Na_x,Fgb_fun(delta,L,uc,ugb,Na_x,pgb_fun(Na_x,Vb,deltaE,T)))           
+title('Poziom Fermiego ~ domieszkowania')                       
 
     
 %FUNKCJE
@@ -268,4 +226,9 @@ title('Poziom Fermiego ~ domieszkowania')
         u = uc *(Fgb + Fc).^-1;
    end
 
+%     fprintf('Gêstoœæ noœników na granicy ziarna:  %e cm^-3\n', pgb_fun(p_L2,Vb,deltaE,T)/1e6);
+%     fprintf('Warstwa zubo¿ona:  %f um\n', W_fun(eps,epsR,Vb,Na)*1e6);
+%     fprintf('Fc: %f\n', Fc_fun(W,L,delta,Vb,T));
+%     fprintf('Fgb: %f\n', Fgb_fun(delta,L,uc,ugb,p_L2,pgb));
+%     fprintf('u = %f cm^2/Vs\n', u_fun(uc,Fgb,Fc)*1e4);
     
