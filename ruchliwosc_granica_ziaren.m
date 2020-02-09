@@ -1,6 +1,22 @@
 %PARAMETRY
 %TYLKO KILKA PARAMETRÓW WYSTÊPUJE JAKO ZMIENNA W OBLICZENIACH
-%S¥ TO: "Na", "Qt", "T", "delta" i "L"
+%S¥ TO: "Na", "Qt", "T", "delta", "Et" i "L"
+
+
+    %ZMIENNE
+    %temperatura
+    T=120;%K
+    %szerokoœæ ziarna
+    L=1e-6;%m
+    %szerokoœæ granicy ziarna
+    delta=0.5e-7;%m
+    % gêstoœæ przestrzenna ³adunku na granicy ziaren 
+    Qt=3e12*1e4;%m^-2
+    % po³o¿enie Et wzglêdem Ei
+    Et=0.1*q;%eV
+    % szerokoœæ po³ówkowa 
+    delta_Et = 0.08*q;
+
 
     %Sta³e Fizyczne
     %sta³a boltzmana
@@ -24,15 +40,10 @@
     deltaE = 0.05*q; %J
     % mobility shoulder? Table II, potrzebne do "grain boundary mobility ugb"
     deltaE_prim = 0.07*q; %J
-    
-    
+  
     %parametry pó³przewodnika
     %ruchliwoœæ w krysztale
     uc = 0.02*1e-4; %m^2/V*s
-    % domieszkoanie
-    Na=1e21; %m^-3
-    % gêstoœæ dziur w wartwie neutralnej p(L/2)
-    p_L2 =Na;
     % przenikalnoœæ elektryczna wzglêdna
     epsR = 12;
     %masa efektywna elektronów
@@ -47,16 +58,7 @@
     Eg = 1*q;
     % gêstoœæ noœników w przewodnik samoistnym
     ni = sqrt(Nv*Nc)*exp(-Eg/(2*k*T))*1e6;
-
-    
-    %parametry ogólne
-    %temperatura
-    T=120;%K
-    %szerokoœæ ziarna
-    L=1e-6;%m
-    %szerokoœæ granicy ziarna
-    delta=1e-7;%m
-    
+   
     
     %parametry pomocnicze do granicy ziaren
     % kappa, Table I, potrzebne do gammy
@@ -68,10 +70,6 @@
 
         
     %parametry granicy ziaren
-    %bariera na granicy ziarna
-    Vb=0.1; %J = 0.1eV
-    % gêstoœæ dziur na granicy ziarna, Appendix
-    pgb = p_L2*exp(-(q*Vb - deltaE)/(k*T));%m^-3
     %extendent state mobility
     uext = q*a^2*ni_jump/(6*k*T); % m/Vs
     % hopping barrier H(E)
@@ -80,11 +78,6 @@
     uhop = u0*exp(-(H/(k*T))); %m/Vs
     % ruchliwoœæ dziór na granicy ziarna, Appendix
     ugb = gamma*uext+(1-gamma)*uhop;
-    % gêstoœæ przestrzenna ³adunku 
-    Qt=5e12*1e4;
-    
-    %chcemy zobaczyæ zmiennoœc wzglêdem "Na", "T" oraz "delta",
-    %ewentualnie "L"
   
     
 %OBLICZENIA NUMERYCZNIE    
@@ -105,71 +98,71 @@
     
     %sklejanie gdy idziemy od ma³ego domieszkowania w górê
     %sklejamy poziomem fermiego
-%     i=1;
-%     is_fermi_small_enough = true;
-%     while i <= length(Na) && is_fermi_small_enough == true
-%         Ef(i)   = findFermi(Na(i), T, delta, L, Qt);
-%         p_L2(i) = p_L2_fun(ni,Ef(i),T);
-%         W(i)    = L/2;
-%         Vb(i)   = Vb_fun(Na(i),W(i));
-%         pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
-%       
-%         if Ef(i) <= Fermi_graniczny(i) || -Ef(i) > 0.5*Eg/q 
-%             is_fermi_small_enough = false;
-%         end
-%         i=i+1;
-%             
-%     end
-%     if is_fermi_small_enough == false
-%         i=i-1;
-%         is_fermi_small_enough = true;
-%         while i <= length(Na) && is_fermi_small_enough == true
-%             Ef(i)   = Fermi_graniczny(i);
-%             p_L2(i) = p_L2_fun(ni,Ef(i),T);
-%             W(i)    = findW(Na(i), T, delta, L, Qt);
-%             Vb(i)   = Vb_fun(Na(i),W(i));
-%             pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
-% 
-%             if -Ef(i) > 0.5*Eg/q 
-%                 is_fermi_small_enough = false;
-%             end
-%             i=i+1;
-% 
-%         end
-%     end
-
-%sklejanie gdy idziemy od du¿ych gêstoœci domieszkowania
-%sklejanie wielkoœci¹ warstwy zubo¿onej
-i=length(Na);
-is_W_small_enough = true;
-while i > 0 && is_W_small_enough == true
-    
-    Ef(i)   = Fermi_graniczny(i);
-    p_L2(i) = p_L2_fun(ni,Ef(i),T);
-    W(i)    = findW(Na(i), T, delta, L, Qt);
-    Vb(i)   = Vb_fun(Na(i),W(i));
-    pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
-
-    if W(i) > L/2 
-        is_W_small_enough = false;
-    end
-    i=i-1;
-    
-end
-
-if is_W_small_enough == false
-    i=i+1;
-    while i > 0
-        Ef(i)   = findFermi(Na(i), T, delta, L, Qt);
+    i=1;
+    is_fermi_small_enough = true; 
+    while i <= length(Na) && is_fermi_small_enough == true
+        Ef(i)   = findFermi(Na(i), T, delta, L, Qt, Et, delta_Et);
         p_L2(i) = p_L2_fun(ni,Ef(i),T);
         W(i)    = L/2;
         Vb(i)   = Vb_fun(Na(i),W(i));
         pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
-
-        i=i-1;
-
+      
+        if Ef(i) <= Fermi_graniczny(i) || -Ef(i) > 0.5*Eg/q 
+            is_fermi_small_enough = false;
+        end
+        i=i+1;
+            
     end
-end
+    if is_fermi_small_enough == false
+        i=i-1;
+        is_fermi_small_enough = true;
+        while i <= length(Na) && is_fermi_small_enough == true
+            Ef(i)   = Fermi_graniczny(i);
+            p_L2(i) = p_L2_fun(ni,Ef(i),T);
+            W(i)    = findW(Na(i), T, delta, L, Qt, Et, delta_Et);
+            Vb(i)   = Vb_fun(Na(i),W(i));
+            pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
+
+            if -Ef(i) > 0.5*Eg/q 
+                is_fermi_small_enough = false;
+            end
+            i=i+1;
+
+        end
+    end
+
+%sklejanie gdy idziemy od du¿ych gêstoœci domieszkowania
+%sklejanie wielkoœci¹ warstwy zubo¿onej - W
+% i=length(Na);
+% is_W_small_enough = true;
+% while i > 0 && is_W_small_enough == true
+%     
+%     Ef(i)   = Fermi_graniczny(i);
+%     p_L2(i) = p_L2_fun(ni,Ef(i),T);
+%     W(i)    = findW(Na(i), T, delta, L, Qt, Et);
+%     Vb(i)   = Vb_fun(Na(i),W(i));
+%     pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
+% 
+%     if W(i) > L/2 
+%         is_W_small_enough = false;
+%     end
+%     i=i-1;
+%     
+% end
+% 
+% if is_W_small_enough == false
+%     i=i+1;
+%     while i > 0
+%         Ef(i)   = findFermi(Na(i), T, delta, L, Qt, Et);
+%         p_L2(i) = p_L2_fun(ni,Ef(i),T);
+%         W(i)    = L/2;
+%         Vb(i)   = Vb_fun(Na(i),W(i));
+%         pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
+% 
+%         i=i-1;
+% 
+%     end
+% end
     
     
     
@@ -178,15 +171,20 @@ subplot(1,3,1)
 loglog(Na/1e6,u_fun(uc, ...
                 Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
                 Fc_fun(W,L,delta,Vb,T))*1e4)
-title('ruchliwoœæ ~ domieszkowania')
+title('ruchliwosc ~ domieszkowania')
 
 subplot(1,3,2)
-loglog(Na/1e6,W)
-title('Warstwa zubo¿ona ~ domieszkowania')
+semilogx(Na/1e6,Vb)
+title('bariera ~ domieszkowania')
+% loglog(Na/1e6,W)
+% title('Warstwa zubo¿ona ~ domieszkowania')
 
 subplot(1,3,3)
 loglog(Na/1e6,Ef)
-title('Poziom Fermiego ~ domieszkowania')                       
+title('Poziom Fermiego ~ domieszkowania')
+
+% figure
+% semilogx(Na/1e6,Vb)
 
     
 %FUNKCJE
@@ -207,10 +205,10 @@ title('Poziom Fermiego ~ domieszkowania')
         pgb = p_L2.*exp(-(q*Vb - deltaE)/(k*T));
     end    
     
-    function W = W_fun(eps,epsR,Vb,Na)
-        q=1.6021766208*10^(-19);
-        W = sqrt(2*eps*epsR*Vb.*(q*Na).^-1);
-    end
+%     function W = W_fun(eps,epsR,Vb,Na)
+%         q=1.6021766208*10^(-19);
+%         W = sqrt(2*eps*epsR*Vb.*(q*Na).^-1);
+%     end
     
    function Fc = Fc_fun(W,L,delta,Vb,T)
         q=1.6021766208*10^(-19);

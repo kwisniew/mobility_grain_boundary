@@ -1,4 +1,4 @@
-function W=findW(Na, T, delta, L, Qt)
+function W=findW(Na, T, delta, L, Qt, Et, delta_Et)
 
 %     L=1e-6;%m
     
@@ -25,8 +25,8 @@ function W=findW(Na, T, delta, L, Qt)
 %         delta=1e-7;%m  
         deltaE = 0.05*q;
 
-        Et=0.01*q;
-        delta_Et = 0.08*q;
+%         Et=0.25*q;
+%         delta_Et = 0.08*q;
         delta_eps = delta_Et/(2*sqrt( log(2) ));
 %         Qt=1e12*1e4;
 

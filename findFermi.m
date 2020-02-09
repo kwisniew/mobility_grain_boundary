@@ -1,4 +1,4 @@
-function Ef=findFermi(Na, T, delta, L, Qt)
+function Ef=findFermi(Na, T, delta, L, Qt, Et, delta_Et)
     
     q=1.6021766208*10^(-19);
 %     T=300;%K
@@ -25,8 +25,8 @@ function Ef=findFermi(Na, T, delta, L, Qt)
         deltaE = 0.05*q;
 
         W = sqrt(2*eps*epsR*Vb/(q*Na));
-        Et=0.01*q;
-        delta_Et = 0.08*q;
+%         Et=0.25*q;
+%         delta_Et = 0.08*q;
         delta_eps = delta_Et/(2*sqrt( log(2) ));
 %         Qt=1e12*1e4;
 
