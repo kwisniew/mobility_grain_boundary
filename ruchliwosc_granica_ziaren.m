@@ -2,29 +2,32 @@
 %TYLKO KILKA PARAMETRÓW WYSTÊPUJE JAKO ZMIENNA W OBLICZENIACH
 %S¥ TO: "Na", "Qt", "T", "delta", "Et" i "L"
 
+    % ³adunek elementarny
+    q=1.6021766208*10^(-19); %C
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     %ZMIENNE
     %temperatura
     T=120;%K
     %szerokoœæ ziarna
-    L=1e-6;%m
+    L=2.0e-6;%m
     %szerokoœæ granicy ziarna
     delta=0.5e-7;%m
     % gêstoœæ przestrzenna ³adunku na granicy ziaren 
-    Qt=3e12*1e4;%m^-2
+    Qt=4e12*1e4;%m^-2
     % po³o¿enie Et wzglêdem Ei
-    Et=0.1*q;%eV
+    Et=0.05*q;%eV
     % szerokoœæ po³ówkowa 
     delta_Et = 0.08*q;
-
+    %przerwa energetyczna
+    Eg = 1.2*q;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %Sta³e Fizyczne
     %sta³a boltzmana
     k = 1.38064852*10^(-23); %J/K
     %przenikalnoœæ elektryczna
     eps = 13*8.85*10^-12;%A^2 s^4 / kh m^3 
-    % ³adunek elementarny
-    q=1.6021766208*10^(-19); %C
 
     
     %parametry mikroskopowe
@@ -54,8 +57,6 @@
     Nc = 2.5*10^19*((e_eff_mass)^(3/2))*(T/300)^(3/2);
     %efektywna gêstoœæ stanów pas walencyjny
     Nv= 2.5*10^19*((h_eff_mass)^(3/2))*(T/300)^(3/2);
-    %przerwa energetyczna
-    Eg = 1*q;
     % gêstoœæ noœników w przewodnik samoistnym
     ni = sqrt(Nv*Nc)*exp(-Eg/(2*k*T))*1e6;
    
@@ -76,7 +77,7 @@
     H = k*T; %J
     %hopping mobility    
     uhop = u0*exp(-(H/(k*T))); %m/Vs
-    % ruchliwoœæ dziór na granicy ziarna, Appendix
+    % ruchliwoœæ dziur na granicy ziarna, Appendix
     ugb = gamma*uext+(1-gamma)*uhop;
   
     
@@ -101,7 +102,7 @@
     i=1;
     is_fermi_small_enough = true; 
     while i <= length(Na) && is_fermi_small_enough == true
-        Ef(i)   = findFermi(Na(i), T, delta, L, Qt, Et, delta_Et);
+        Ef(i)   = findFermi(Na(i), T, delta, L, Qt, Et, delta_Et, Eg);
         p_L2(i) = p_L2_fun(ni,Ef(i),T);
         W(i)    = L/2;
         Vb(i)   = Vb_fun(Na(i),W(i));
@@ -119,7 +120,7 @@
         while i <= length(Na) && is_fermi_small_enough == true
             Ef(i)   = Fermi_graniczny(i);
             p_L2(i) = p_L2_fun(ni,Ef(i),T);
-            W(i)    = findW(Na(i), T, delta, L, Qt, Et, delta_Et);
+            W(i)    = findW(Na(i), T, delta, L, Qt, Et, delta_Et, Eg);
             Vb(i)   = Vb_fun(Na(i),W(i));
             pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
 
@@ -139,7 +140,7 @@
 %     
 %     Ef(i)   = Fermi_graniczny(i);
 %     p_L2(i) = p_L2_fun(ni,Ef(i),T);
-%     W(i)    = findW(Na(i), T, delta, L, Qt, Et);
+%     W(i)    = findW(Na(i), T, delta, L, Qt, Et, delta_Et, Eg);
 %     Vb(i)   = Vb_fun(Na(i),W(i));
 %     pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
 % 
@@ -153,7 +154,7 @@
 % if is_W_small_enough == false
 %     i=i+1;
 %     while i > 0
-%         Ef(i)   = findFermi(Na(i), T, delta, L, Qt, Et);
+%         Ef(i)   = findFermi(Na(i), T, delta, L, Qt, Et, delta_Et, Eg);
 %         p_L2(i) = p_L2_fun(ni,Ef(i),T);
 %         W(i)    = L/2;
 %         Vb(i)   = Vb_fun(Na(i),W(i));
@@ -180,8 +181,9 @@ title('bariera ~ domieszkowania')
 % title('Warstwa zubo¿ona ~ domieszkowania')
 
 subplot(1,3,3)
-loglog(Na/1e6,Ef)
-title('Poziom Fermiego ~ domieszkowania')
+loglog(Na/1e6,p_L2)
+title('p(L/2) ~ domieszkowania')
+% title('Poziom Fermiego ~ domieszkowania')
 
 % figure
 % semilogx(Na/1e6,Vb)

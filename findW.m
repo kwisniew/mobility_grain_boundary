@@ -1,4 +1,4 @@
-function W=findW(Na, T, delta, L, Qt, Et, delta_Et)
+function W=findW(Na, T, delta, L, Qt, Et, delta_Et, Eg)
 
 %     L=1e-6;%m
     
@@ -15,7 +15,7 @@ function W=findW(Na, T, delta, L, Qt, Et, delta_Et)
         h_eff_mass = 0.72;
         Nc = 2.5*10^19*((e_eff_mass)^(3/2))*(T/300)^(3/2);
         Nv= 2.5*10^19*((h_eff_mass)^(3/2))*(T/300)^(3/2);
-        Eg = 1*q;
+%         Eg = 1.2*q;
         ni = sqrt(Nv*Nc)*exp(-Eg/(2*k*T))*1e6;
         Ef = k*T*log(ni./Na)/q;
 
