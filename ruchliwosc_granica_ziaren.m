@@ -10,11 +10,11 @@
     %temperatura
     T=120;%K
     %szerokoœæ ziarna
-    L=2.0e-6;%m
+    L=0.3e-6;%m
     %szerokoœæ granicy ziarna
-    delta=0.5e-7;%m
+    delta=2e-9;%m
     % gêstoœæ przestrzenna ³adunku na granicy ziaren 
-    Qt=4e12*1e4;%m^-2
+    Qt=2e12*1e4;%m^-2
     % po³o¿enie Et wzglêdem Ei
     Et=0.05*q;%eV
     % szerokoœæ po³ówkowa 
@@ -100,13 +100,20 @@
     %sklejanie gdy idziemy od ma³ego domieszkowania w górê
     %sklejamy poziomem fermiego
     i=1;
-    is_fermi_small_enough = true; 
+    is_fermi_small_enough = true;
+    fprintf('Lewa strona\n')
     while i <= length(Na) && is_fermi_small_enough == true
         Ef(i)   = findFermi(Na(i), T, delta, L, Qt, Et, delta_Et, Eg);
         p_L2(i) = p_L2_fun(ni,Ef(i),T);
         W(i)    = L/2;
         Vb(i)   = Vb_fun(Na(i),W(i));
         pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
+        
+        if (Vb(i)>0.13 && Vb(i)<0.15) || (Vb(i)>0.08 && Vb(i)<0.1)
+            fprintf('Vbi:   %f    u:   %e    Na:   %e\n', Vb(i),u_fun(uc, ...
+                                                          Fgb_fun(delta,L,uc,ugb,p_L2(i),pgb(i)), ...
+                                                          Fc_fun(W(i),L,delta,Vb(i),T))*1e4, Na(i)/1e6)
+        end
       
         if Ef(i) <= Fermi_graniczny(i) || -Ef(i) > 0.5*Eg/q 
             is_fermi_small_enough = false;
@@ -115,6 +122,7 @@
             
     end
     if is_fermi_small_enough == false
+        fprintf('Prawa strona\n')
         i=i-1;
         is_fermi_small_enough = true;
         while i <= length(Na) && is_fermi_small_enough == true
@@ -123,7 +131,13 @@
             W(i)    = findW(Na(i), T, delta, L, Qt, Et, delta_Et, Eg);
             Vb(i)   = Vb_fun(Na(i),W(i));
             pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
-
+            
+            if (Vb(i)>0.13 && Vb(i)<0.15) || (Vb(i)>0.08 && Vb(i)<0.1)
+            fprintf('Vbi:   %f    u:   %e    Na:   %e\n', Vb(i),u_fun(uc, ...
+                                                          Fgb_fun(delta,L,uc,ugb,p_L2(i),pgb(i)), ...
+                                                          Fc_fun(W(i),L,delta,Vb(i),T))*1e4, Na(i)/1e6)
+            end
+            
             if -Ef(i) > 0.5*Eg/q 
                 is_fermi_small_enough = false;
             end
