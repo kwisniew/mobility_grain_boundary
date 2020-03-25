@@ -8,26 +8,28 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     %ZMIENNE
     %temperatura
-    T=120;%K
+    T=300;%K
     %szerokoœæ ziarna
-    L=0.3e-6;%m
+    L=1e-6;%m
     %szerokoœæ granicy ziarna
-    delta=2e-9;%m
+    delta=1e-9;%m
     % gêstoœæ przestrzenna ³adunku na granicy ziaren 
-    Qt=2e12*1e4;%m^-2
+    Qt=4e12*1e4;%m^-2
     % po³o¿enie Et wzglêdem Ei
     Et=0.05*q;%eV
     % szerokoœæ po³ówkowa 
-    delta_Et = 0.08*q;
+    delta_Et = 0.083*q;
     %przerwa energetyczna
     Eg = 1.2*q;
+    % przenikalnoœæ elektryczna wzglêdna
+    epsR = 13*5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %Sta³e Fizyczne
     %sta³a boltzmana
     k = 1.38064852*10^(-23); %J/K
     %przenikalnoœæ elektryczna
-    eps = 13*8.85*10^-12;%A^2 s^4 / kh m^3 
+    eps = 8.85*10^-12;%A^2 s^4 / kg m^3 
 
     
     %parametry mikroskopowe
@@ -47,8 +49,6 @@
     %parametry pó³przewodnika
     %ruchliwoœæ w krysztale
     uc = 0.02*1e-4; %m^2/V*s
-    % przenikalnoœæ elektryczna wzglêdna
-    epsR = 12;
     %masa efektywna elektronów
     e_eff_mass = 0.09;  
     %masa efektywna dziur
@@ -72,11 +72,11 @@
         
     %parametry granicy ziaren
     %extendent state mobility
-    uext = q*a^2*ni_jump/(6*k*T); % m/Vs
+    uext = q*a^2*ni_jump/(6*k*T); % m^2/Vs 12*1e-4;%
     % hopping barrier H(E)
     H = k*T; %J
     %hopping mobility    
-    uhop = u0*exp(-(H/(k*T))); %m/Vs
+    uhop = u0*exp(-(H/(k*T))); %m^2/Vs 0.1e-4;%
     % ruchliwoœæ dziur na granicy ziarna, Appendix
     ugb = gamma*uext+(1-gamma)*uhop;
   
@@ -103,7 +103,7 @@
     is_fermi_small_enough = true;
     fprintf('Lewa strona\n')
     while i <= length(Na) && is_fermi_small_enough == true
-        Ef(i)   = findFermi(Na(i), T, delta, L, Qt, Et, delta_Et, Eg);
+        Ef(i)   = findFermi(Na(i), T, delta, L, Qt, Et, delta_Et, Eg, epsR);
         p_L2(i) = p_L2_fun(ni,Ef(i),T);
         W(i)    = L/2;
         Vb(i)   = Vb_fun(Na(i),W(i));
@@ -128,7 +128,7 @@
         while i <= length(Na) && is_fermi_small_enough == true
             Ef(i)   = Fermi_graniczny(i);
             p_L2(i) = p_L2_fun(ni,Ef(i),T);
-            W(i)    = findW(Na(i), T, delta, L, Qt, Et, delta_Et, Eg);
+            W(i)    = findW(Na(i), T, delta, L, Qt, Et, delta_Et, Eg,epsR);
             Vb(i)   = Vb_fun(Na(i),W(i));
             pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
             
@@ -182,22 +182,30 @@
     
     
 %WYKRESY:
-subplot(1,3,1)
+% subplot(1,3,1)
 loglog(Na/1e6,u_fun(uc, ...
                 Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
                 Fc_fun(W,L,delta,Vb,T))*1e4)
-title('ruchliwosc ~ domieszkowania')
+% title('ruchliwosc ~ domieszkowania')
+% 
+% fileID = fopen('mobility_100K.txt','w');
+% data = [Na/1e6;u_fun(uc, ...
+%                 Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
+%                 Fc_fun(W,L,delta,Vb,T))*1e4];
+% fprintf(fileID,'%d %d\n',data);
+% fclose(fileID);
 
-subplot(1,3,2)
-semilogx(Na/1e6,Vb)
-title('bariera ~ domieszkowania')
+
+% subplot(1,3,2)
+% semilogx(Na/1e6,Vb)
+% title('bariera ~ domieszkowania')
 % loglog(Na/1e6,W)
 % title('Warstwa zubo¿ona ~ domieszkowania')
-
-subplot(1,3,3)
-loglog(Na/1e6,p_L2)
-title('p(L/2) ~ domieszkowania')
-% title('Poziom Fermiego ~ domieszkowania')
+% 
+% subplot(1,3,3)
+% loglog(Na/1e6,p_L2)
+% title('p(L/2) ~ domieszkowania')
+% % title('Poziom Fermiego ~ domieszkowania')
 
 % figure
 % semilogx(Na/1e6,Vb)

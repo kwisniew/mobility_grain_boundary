@@ -1,4 +1,4 @@
-function W=findW(Na, T, delta, L, Qt, Et, delta_Et, Eg)
+function W=findW(Na, T, delta, L, Qt, Et, delta_Et, Eg,epsR)
 
 %     L=1e-6;%m
     
@@ -8,8 +8,8 @@ function W=findW(Na, T, delta, L, Qt, Et, delta_Et, Eg)
         
         q=1.6021766208*10^(-19);
 %         T=300;%K
-        eps = 13*8.85*10^-12;%A^2 s^4 / kh m^3 
-        epsR = 12;
+        eps = 8.85*10^-12;%A^2 s^4 / kg m^3 
+%        epsR = 13;
         k = 1.38064852*10^(-23); %J/K
         e_eff_mass = 0.09;
         h_eff_mass = 0.72;

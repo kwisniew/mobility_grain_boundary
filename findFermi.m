@@ -1,9 +1,9 @@
-function Ef=findFermi(Na, T, delta, L, Qt, Et, delta_Et, Eg)
+function Ef=findFermi(Na, T, delta, L, Qt, Et, delta_Et, Eg,epsR)
     
     q=1.6021766208*10^(-19);
 %     T=300;%K
-    eps = 13*8.85*10^-12;%A^2 s^4 / kh m^3 
-    epsR = 12;
+    eps = 8.85*10^-12;%A^2 s^4 / kg m^3 
+%    epsR = 13;
 %     L=1e-6;%m
     Vb = q*Na*L^2/(8*eps*epsR);
     Ef = fzero(@charge_neut_cond,-q*Vb);
