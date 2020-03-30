@@ -8,7 +8,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     %ZMIENNE
     %temperatura
-    T=300;%K
+    % UWAGA: ka¿da zmiana T powoduje, ¿e
+    %        trzeba jeszcze raz przeliczyæ ca³ki w Mathematice!!!
+    T=100;%K
     %szerokoœæ ziarna
     L=1e-6;%m
     %szerokoœæ granicy ziarna
@@ -18,6 +20,8 @@
     % po³o¿enie Et wzglêdem Ei
     Et=0.00*q;%eV
     % szerokoœæ po³ówkowa 
+    % UWAGA: ka¿da zmiana delta_Et (bazowo: 0.08q) powoduje, ¿e
+    %        trzeba jeszcze raz przeliczyæ ca³ki w Mathematice!!!
     delta_Et = 0.083*q;
     %przerwa energetyczna
     Eg = 1.20*q;
@@ -191,12 +195,12 @@ loglog(Na/1e6,u_fun(uc, ...
                 Fc_fun(W,L,delta,Vb,T))*1e4)
 % title('ruchliwosc ~ domieszkowania')
 % 
-% fileID = fopen('mobility_100K.txt','w');
-% data = [Na/1e6;u_fun(uc, ...
-%                 Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
-%                 Fc_fun(W,L,delta,Vb,T))*1e4];
-% fprintf(fileID,'%d %d\n',data);
-% fclose(fileID);
+fileID = fopen('mobility_100K.txt','w');
+data = [Na/1e6;u_fun(uc, ...
+                Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
+                Fc_fun(W,L,delta,Vb,T))*1e4];
+fprintf(fileID,'%d %d\n',data);
+fclose(fileID);
 
 
 % subplot(1,3,2)

@@ -4,7 +4,7 @@ function Ef=findFermi(Na, T, delta, L, Qt, Et, delta_Et, Eg, epsR)
     eps = 8.85*10^-12;%A^2 s^4 / kg m^3 
     Vb = q*Na*L^2/(8*eps*epsR);
     %options = optimset('Display','iter');
-    Ef = fzero(@charge_neut_cond,0.0);%,options);
+    Ef = fzero(@charge_neut_cond,-Vb);%,options);
     
     function cnc_expression = charge_neut_cond(Ef)
       
@@ -20,17 +20,10 @@ function Ef=findFermi(Na, T, delta, L, Qt, Et, delta_Et, Eg, epsR)
 
         
         b1 = (q*Ef+Et+q*Vb)/(k*T);
-        
-        Q1 =  1.64696 - 0.844494 * exp((0.386513 - 0.0743295 * b1)* b1) + ... 
-              exp((-0.386513 - 0.0743295 *b1) *b1) * (0.844494 - 0.844494 * erf(0.416573 - 0.46392*b1)) + ...
-              0.844494 * exp((0.386513 - 0.0743295 *b1) *b1)* erf(0.416573 + 0.46392 * b1) - ... 
-              1.64696 * erf(0.5381 * b1);
+        Q1 = Q_integral_fun(b1,5.12634,2.06901,0.11965,0.0230097,0.721425,0.0829264,0.172877);
 
-        b2 = (Et)/(k*T);                                       
-        Q2 =  1.64696 - 0.844494 * exp((0.386513 - 0.0743295 * b2)* b2) + ... 
-              exp((-0.386513 - 0.0743295 *b2) *b2) * (0.844494 - 0.844494 * erf(0.416573 - 0.46392*b2)) + ...
-              0.844494 * exp((0.386513 - 0.0743295 *b2) *b2)* erf(0.416573 + 0.46392 * b2) - ... 
-              1.64696 * erf(0.5381 * b2);
+        b2 = (Et)/(k*T);
+        Q2 = Q_integral_fun(b2,5.12634,2.06901,0.11965,0.0230097,0.721425,0.0829264,0.172877);
 
         Q_dep_reg = Na*L;
         Q_trap    = Qt*(k*T/(sqrt(pi)*delta_eps))*(Q1-Q2);
@@ -40,6 +33,39 @@ function Ef=findFermi(Na, T, delta, L, Qt, Et, delta_Et, Eg, epsR)
         
     end
 end
+
+%heurystyka przepisywania parametrów A,B,...:
+%najpierw przepisz 4 pierwsze parametry jak leci, póŸniej dwa parametry z
+%pierwszego erfa, a póŸniej parametr z ostatniego erfa
+function Q_integral = Q_integral_fun(b,A,B,C,D,E,F,G)
+    Q_integral =  A-B*exp((C-D*b)*b)+exp((-C-D*b)*b)*(B-B*erf(E-F*b)) + ...
+                    B*exp((C-D*b)*b)*erf(E+F*b)-A*erf(G*b);
+end
+
+%ca³ka dla T=100, delta_Et=0.08q
+%Q_integral_fun(b1,5.12634,2.06901,0.11965,0.0230097,0.721425,0.0829264,0.172877);
+
+%ca³ka dla T=150, delta_Et=0.08q
+%Q_integral_fun(b2,3.41756,1.62323,0.209078,0.0402073,0.635766,0.16443,0.259316);
+
+%ca³ka dla T=200, delta_Et=0.08q
+%Q_integral_fun(b2,2.56317,1.28669,0.283147,0.0544514,0.554895,0.255136,0.345754)
+
+% ca³ka dla T=250, delta_Et=0.08q
+% Q_integral_fun(b1,2.05054,1.04737,0.338683,0.0651313,0.485502,0.348797,0.432193);
+
+
+%  ca³ka dla T=300, delta_Et=0.08q
+%
+%         Q1 =  1.64696 - 0.844494 * exp((0.386513 - 0.0743295 * b1)* b1) + ... 
+%               exp((-0.386513 - 0.0743295 *b1) *b1) * (0.844494 - 0.844494 * erf(0.416573 - 0.46392*b1)) + ...
+%               0.844494 * exp((0.386513 - 0.0743295 *b1) *b1)* erf(0.416573 + 0.46392 * b1) - ... 
+%               1.64696 * erf(0.5381 * b1);
+%         Q2 =  1.64696 - 0.844494 * exp((0.386513 - 0.0743295 * b2)* b2) + ... 
+%               exp((-0.386513 - 0.0743295 *b2) *b2) * (0.844494 - 0.844494 * erf(0.416573 - 0.46392*b2)) + ...
+%               0.844494 * exp((0.386513 - 0.0743295 *b2) *b2)* erf(0.416573 + 0.46392 * b2) - ... 
+%               1.64696 * erf(0.5381 * b2);
+
 
         %a=0.5186;%k*T/delta_eps;
 %         Q1 =  (0.443113 * exp((0.0676 + (a^2)*(-0.52-0.1*b1)*b1)/(0.1+a^2))* ...
