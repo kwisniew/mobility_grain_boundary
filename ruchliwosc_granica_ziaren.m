@@ -2,16 +2,13 @@
 %TYLKO KILKA PARAMETRÓW WYSTÊPUJE JAKO ZMIENNA W OBLICZENIACH
 %S¥ TO: "Na", "Qt", "T", "delta", "Et" i "L"
 
-    % ³adunek elementarny
-    q=1.6021766208*10^(-19); %C
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     %ZMIENNE
     %temperatura
     % UWAGA: ka¿da zmiana T powoduje, ¿e
     %        trzeba jeszcze raz przeliczyæ ca³ki w Mathematice!!!
     Temperature = [300,250,200,150,100];
-    T=Temperature(4);%K
+    T=Temperature(1);%K
     %szerokoœæ ziarna
     L=1e-6;%m
     %szerokoœæ granicy ziarna
@@ -19,7 +16,7 @@
     % gêstoœæ przestrzenna ³adunku na granicy ziaren 
     Qt=1e12*1e4;%m^-2
     % po³o¿enie Et wzglêdem Ei
-    Et=0.00*q;%eV
+    Et=0.35*q;%eV
     % szerokoœæ po³ówkowa 
     % UWAGA: ka¿da zmiana delta_Et (bazowo: 0.083q) powoduje, ¿e
     %        trzeba jeszcze raz przeliczyæ ca³ki w Mathematice!!!
@@ -29,8 +26,12 @@
     % przenikalnoœæ elektryczna wzglêdna
     epsR = 13;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %obliczeniowe
+    calculate_thermal_scan = true;
 
-    %Sta³e Fizyczne
+    %Sta³e Fizyczne    
+    % ³adunek elementarny
+    q=1.6021766208*10^(-19); %C
     %sta³a boltzmana
     k = 1.38064852*10^(-23); %J/K
     %przenikalnoœæ elektryczna
@@ -84,8 +85,7 @@
     uhop = 0.1e-4;%u0*exp(-(H/(k*T))); %m^2/Vs 0.1e-4;%
     % ruchliwoœæ dziur na granicy ziarna, Appendix
     ugb = gamma*uext+(1-gamma)*uhop;
-    
-    
+        
     %sprawdzanie
      delta_eps = delta_Et/(2*sqrt( log(2) ));
      deltaE = 0.05*q;  
@@ -95,65 +95,49 @@
 
 % obliczam dla jakiej maksymalnej koncentracji akceptorów pó³przewodnik nie jest jeszcze zdegenerowany
 % czyli gdy Ef = Eg/2 (póŸniej obliczenia nie maj¹ sensu)
-max_non_degenerate_Na = ni*exp(Eg/(2*k*T));
 
-Na   = exp(19*log(10):0.1:log(max_non_degenerate_Na));
-pgb  = zeros(length(Na),1)';
-p_L2 = zeros(length(Na),1)';
-W    = zeros(length(Na),1)';
-Vb   = zeros(length(Na),1)';
-Ef   = zeros(length(Na),1)';
-Fermi_graniczny = k*T*log(ni./Na)/q;
+if calculate_thermal_scan
+    number_of_calculation = length(Temperature);
+    %UWAGA! poni¿sza wartoœæ bêdzie najmniejsza dla najwiêkszych temperatur
+    %       trzeba pamiêtaæ o tym, ¿eby w "Temperature" na pozycji 1 by³a 
+    %       najwiêksza temperatura
+    max_non_degenerate_Na = ni*exp(Eg/(2*k*Temperature(1)));
 
-%sklejanie gdy idziemy od ma³ego domieszkowania w górê
-%sklejamy poziomem fermiego
-i=1;
-is_fermi_small_enough = true;
-fprintf('Lewa strona\n')
-while i <= length(Na) && is_fermi_small_enough == true
-    %fprintf('%f\n', i)
-    Ef(i)   = findFermi(Na(i), T, delta, L, Qt, Et, delta_Et, Eg, epsR);
-    p_L2(i) = p_L2_fun(ni,Ef(i),T);
-    W(i)    = L/2;
-    Vb(i)   = Vb_fun(Na(i),W(i));
-    pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
+    Na   = exp(19*log(10):0.1:log(max_non_degenerate_Na));
+    pgb  = zeros(length(Na),number_of_calculation)';
+    p_L2 = zeros(length(Na),number_of_calculation)';
+    W    = zeros(length(Na),number_of_calculation)';
+    Vb   = zeros(length(Na),number_of_calculation)';
+    Ef   = zeros(length(Na),number_of_calculation)';
+    Fermi_graniczny = k*T*log(ni./Na)/q;
 
-    if (Vb(i)>0.13 && Vb(i)<0.15) || (Vb(i)>0.08 && Vb(i)<0.1)
-        fprintf('Vbi:   %f    u:   %e    Na:   %e\n', Vb(i),u_fun(uc, ...
-                                                      Fgb_fun(delta,L,uc,ugb,p_L2(i),pgb(i)), ...
-                                                      Fc_fun(W(i),L,delta,Vb(i),T))*1e4, Na(i)/1e6)
+    %sklejanie gdy idziemy od ma³ego domieszkowania w górê
+    %sklejamy poziomem fermiego
+    for i=1:number_of_calculation
+    [pgb(i,:),p_L2(i,:),W(i,:),Vb(i,:),Ef(i,:)] = sove_problem_for_all_Na(...
+                                    Na,pgb(i,:),p_L2(i,:),W(i,:),Vb(i,:),Ef(i,:),Fermi_graniczny,...
+                                    ni,Temperature(i),delta,L,Qt,Et,delta_Et,Eg,epsR,deltaE,q,uc,ugb);
     end
+    [Ea, all_mobilities] = calculate_activation_energy(Na,length(Na),Temperature,W,L,delta,Vb,uc,ugb,p_L2,pgb);
+else
+    number_of_calculation = 1;
+    max_non_degenerate_Na = ni*exp(Eg/(2*k*T));
 
-    if Ef(i) <= Fermi_graniczny(i) || -Ef(i) > 0.5*Eg/q 
-        is_fermi_small_enough = false;
-    end
-    i=i+1;
+    Na   = exp(19*log(10):0.1:log(max_non_degenerate_Na));
+    pgb  = zeros(length(Na),1)';
+    p_L2 = zeros(length(Na),1)';
+    W    = zeros(length(Na),1)';
+    Vb   = zeros(length(Na),1)';
+    Ef   = zeros(length(Na),1)';
+    Fermi_graniczny = k*T*log(ni./Na)/q;
 
-end
-fprintf('N*    %e\n',Na(i-2)/1e6)
-if is_fermi_small_enough == false
-    fprintf('Prawa strona\n')
-    i=i-1;
-    is_fermi_small_enough = true;
-    while i <= length(Na) && is_fermi_small_enough == true
-        Ef(i)   = Fermi_graniczny(i);
-        p_L2(i) = p_L2_fun(ni,Ef(i),T);
-        W(i)    = findW(Na(i), T, delta, L, Qt, Et, delta_Et, Eg,epsR);
-        Vb(i)   = Vb_fun(Na(i),W(i));
-        pgb(i)  = pgb_fun(p_L2(i),Vb(i),deltaE,T);
+    %sklejanie gdy idziemy od ma³ego domieszkowania w górê
+    %sklejamy poziomem fermiego
+    [pgb,p_L2,W,Vb,Ef] = sove_problem_for_all_Na(...
+                                    Na,pgb,p_L2,W,Vb,Ef,Fermi_graniczny,...
+                                    ni,T,delta,L,Qt,Et,delta_Et,Eg,epsR,deltaE,q,uc,ugb);
 
-        if (Vb(i)>0.13 && Vb(i)<0.15) || (Vb(i)>0.08 && Vb(i)<0.1)
-        fprintf('Vbi:   %f    u:   %e    Na:   %e\n', Vb(i),u_fun(uc, ...
-                                                      Fgb_fun(delta,L,uc,ugb,p_L2(i),pgb(i)), ...
-                                                      Fc_fun(W(i),L,delta,Vb(i),T))*1e4, Na(i)/1e6)
-        end
 
-        if -Ef(i) > 0.5*Eg/q 
-            is_fermi_small_enough = false;
-        end
-        i=i+1;
-
-    end
 end
 %% Sklejanie W
 
@@ -205,20 +189,23 @@ end
 
 
 % subplot(1,3,2)
-% semilogx(Na/1e6,Vb)
+% semilogx(Na/1e6,Vb(5,:))
 % title('bariera ~ domieszkowania')
 % loglog(Na/1e6,W)
 % title('Warstwa zubo¿ona ~ domieszkowania')
 % 
 % subplot(1,3,3)
-loglog(Na/1e6,p_L2)
+% loglog(Na/1e6,p_L2)
 % title('p(L/2) ~ domieszkowania')
 % % title('Poziom Fermiego ~ domieszkowania')
 
 % figure
 % semilogx(Na/1e6,Vb)
 
-%semilogx(Na/1e6,Ef)    
+%semilogx(Na/1e6,Ef)
+
+semilogx(Na(1,:)/1e6,Ea(1,:))
+title('Energia aktywacji ~ domieszkowania')
 %% FUNKCJE
    function Vb = Vb_fun(Na,W)
         q    = 1.6021766208*10^(-19);
@@ -246,6 +233,78 @@ loglog(Na/1e6,p_L2)
     end
    function u = u_fun(uc,Fgb,Fc)
         u = uc *(Fgb + Fc).^-1;
+   end
+   function [pgb,p_L2,W,Vb,Ef] = sove_problem_for_all_Na(Na_x,pgb_x,p_L2_x,W_x,Vb_x,Ef_x,Fermi_graniczny_x,ni,T,delta,L,Qt,Et,delta_Et,Eg,epsR,deltaE,q,uc,ugb)
+        i=1;
+        is_fermi_small_enough = true;
+        fprintf('Lewa strona\n')
+        while i <= length(Na_x) && is_fermi_small_enough == true
+            %fprintf('%f\n', i)
+            Ef_x(i)   = findFermi(Na_x(i), T, delta, L, Qt, Et, delta_Et, Eg, epsR);
+            p_L2_x(i) = p_L2_fun(ni,Ef_x(i),T);
+            W_x(i)    = L/2;
+            Vb_x(i)   = Vb_fun(Na_x(i),W_x(i));
+            pgb_x(i)  = pgb_fun(p_L2_x(i),Vb_x(i),deltaE,T);
+
+            if (Vb_x(i)>0.13 && Vb_x(i)<0.15) || (Vb_x(i)>0.08 && Vb_x(i)<0.1)
+                fprintf('Vbi:   %f    u:   %e    Na:   %e\n', Vb_x(i),u_fun(uc, ...
+                                                              Fgb_fun(delta,L,uc,ugb,p_L2_x(i),pgb_x(i)), ...
+                                                              Fc_fun(W_x(i),L,delta,Vb_x(i),T))*1e4, Na_x(i)/1e6)
+            end
+
+            if Ef_x(i) <= Fermi_graniczny_x(i) || -Ef_x(i) > 0.5*Eg/q 
+                is_fermi_small_enough = false;
+            end
+            i=i+1;
+
+        end
+        fprintf('N*    %e\n',Na_x(i-2)/1e6)
+        if is_fermi_small_enough == false
+            fprintf('Prawa strona\n')
+            i=i-1;
+            is_fermi_small_enough = true;
+            while i <= length(Na_x) && is_fermi_small_enough == true
+                Ef_x(i)   = Fermi_graniczny_x(i);
+                p_L2_x(i) = p_L2_fun(ni,Ef_x(i),T);
+                W_x(i)    = findW(Na_x(i), T, delta, L, Qt, Et, delta_Et, Eg,epsR);
+                Vb_x(i)   = Vb_fun(Na_x(i),W_x(i));
+                pgb_x(i)  = pgb_fun(p_L2_x(i),Vb_x(i),deltaE,T);
+
+                if (Vb_x(i)>0.13 && Vb_x(i)<0.15) || (Vb_x(i)>0.08 && Vb_x(i)<0.1)
+                fprintf('Vbi:   %f    u:   %e    Na:   %e\n', Vb_x(i),u_fun(uc, ...
+                                                              Fgb_fun(delta,L,uc,ugb,p_L2_x(i),pgb_x(i)), ...
+                                                              Fc_fun(W_x(i),L,delta,Vb_x(i),T))*1e4, Na_x(i)/1e6)
+                end
+
+                if -Ef_x(i) > 0.5*Eg/q 
+                    is_fermi_small_enough = false;
+                end
+                i=i+1;
+
+            end
+        end
+
+       pgb = pgb_x;
+       p_L2 = p_L2_x;
+       W = W_x;
+       Vb = Vb_x;
+       Ef = Ef_x;
+   end
+   function [Ea, all_mobilities] = calculate_activation_energy(Na,max_Na,T,W,L,delta,Vb,uc,ugb,p_L2,pgb)
+    
+    all_mobilities = zeros(length(T),max_Na);
+    for i=1:length(T)
+       all_mobilities(i,1:max_Na)= u_fun(uc, ...
+                                         Fgb_fun(delta,L,uc,ugb,p_L2(i,1:max_Na),pgb(i,1:max_Na)), ...
+                                         Fc_fun(W(i,1:max_Na),L,delta,Vb(i,1:max_Na),T(i)))*1e4;
+    end
+    Ea = zeros(2,max_Na);
+    for i=1:max_Na
+        Ea(:,i) = polyfit(1./T,log( all_mobilities(:,i)' ),1);
+    end
+     q=1.6021766208*10^(-19); %C
+     k = 1.38064852*10^(-23); %J/K
+     Ea(1,:) = -Ea(1,:)*k/q;
    end
 %     function W = W_fun(eps,epsR,Vb,Na)
 %         q=1.6021766208*10^(-19); W = sqrt(2*eps*epsR*Vb.*(q*Na).^-1);
