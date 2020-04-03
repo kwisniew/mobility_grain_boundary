@@ -10,7 +10,8 @@
     %temperatura
     % UWAGA: ka¿da zmiana T powoduje, ¿e
     %        trzeba jeszcze raz przeliczyæ ca³ki w Mathematice!!!
-    T=100;%K
+    Temperature = [300,250,200,150,100];
+    T=Temperature(4);%K
     %szerokoœæ ziarna
     L=1e-6;%m
     %szerokoœæ granicy ziarna
@@ -20,7 +21,7 @@
     % po³o¿enie Et wzglêdem Ei
     Et=0.00*q;%eV
     % szerokoœæ po³ówkowa 
-    % UWAGA: ka¿da zmiana delta_Et (bazowo: 0.08q) powoduje, ¿e
+    % UWAGA: ka¿da zmiana delta_Et (bazowo: 0.083q) powoduje, ¿e
     %        trzeba jeszcze raz przeliczyæ ca³ki w Mathematice!!!
     delta_Et = 0.083*q;
     %przerwa energetyczna
@@ -190,27 +191,27 @@ end
 % end
 %% WYKRESY:
 % subplot(1,3,1)
-loglog(Na/1e6,u_fun(uc, ...
-                Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
-                Fc_fun(W,L,delta,Vb,T))*1e4)
+% loglog(Na/1e6,u_fun(uc, ...
+%                 Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
+%                 Fc_fun(W,L,delta,Vb,T))*1e4)
 % title('ruchliwosc ~ domieszkowania')
 % 
-fileID = fopen('mobility_100K.txt','w');
-data = [Na/1e6;u_fun(uc, ...
-                Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
-                Fc_fun(W,L,delta,Vb,T))*1e4];
-fprintf(fileID,'%d %d\n',data);
-fclose(fileID);
+% fileID = fopen('mobility_100K.txt','w');
+% data = [Na/1e6;u_fun(uc, ...
+%                 Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
+%                 Fc_fun(W,L,delta,Vb,T))*1e4];
+% fprintf(fileID,'%f %f\n',data);
+% fclose(fileID);
 
 
 % subplot(1,3,2)
-%semilogx(Na/1e6,Vb)
+% semilogx(Na/1e6,Vb)
 % title('bariera ~ domieszkowania')
 % loglog(Na/1e6,W)
 % title('Warstwa zubo¿ona ~ domieszkowania')
 % 
 % subplot(1,3,3)
-% loglog(Na/1e6,p_L2)
+loglog(Na/1e6,p_L2)
 % title('p(L/2) ~ domieszkowania')
 % % title('Poziom Fermiego ~ domieszkowania')
 
