@@ -10,11 +10,11 @@
     Temperature = [300,250,200,150,100];
     T=Temperature(1);%K
     %szerokoœæ ziarna
-    L=1e-6;%m
+    L=0.87e-6;%m
     %szerokoœæ granicy ziarna
     delta=2e-9;%m
     % gêstoœæ przestrzenna ³adunku na granicy ziaren 
-    Qt=1e12*1e4;%m^-2
+    Qt=1e11*1e4;%m^-2
     % po³o¿enie Et wzglêdem Ei
     Et=0.35*q;%eV
     % szerokoœæ po³ówkowa 
@@ -59,12 +59,6 @@
     e_eff_mass = 0.09;  
     %masa efektywna dziur
     h_eff_mass = 0.72;
-    %efektywna gêstoœæ stanów pas przewodnictwa
-    Nc = 2.5*10^19*((e_eff_mass)^(3/2))*(T/300)^(3/2);
-    %efektywna gêstoœæ stanów pas walencyjny
-    Nv= 2.5*10^19*((h_eff_mass)^(3/2))*(T/300)^(3/2);
-    % gêstoœæ noœników w przewodnik samoistnym
-    ni = sqrt(Nv*Nc)*exp(-Eg/(2*k*T))*1e6;
    
     
     %parametry pomocnicze do granicy ziaren
@@ -89,18 +83,19 @@
     %sprawdzanie
      delta_eps = delta_Et/(2*sqrt( log(2) ));
      deltaE = 0.05*q;  
-%% OBLICZENIA NUMERYCZNIE    
+%% OBLICZENIA NUMERYCZNIE
 %zmienne do obliczenia przy danym Na:
 % p_L2, pgb, Ef (fermi level), Vb, delta_Qt oraz W (dla przypadku, gdy ziarno ju¿ nie jest ca³kowicie zubo¿one)
 
 % obliczam dla jakiej maksymalnej koncentracji akceptorów pó³przewodnik nie jest jeszcze zdegenerowany
-% czyli gdy Ef = Eg/2 (póŸniej obliczenia nie maj¹ sensu)
+% czyli gdy Ef = Eg/2 (póŸniej obliczenia nie maj¹ sensu) - zob. max_non_degenerate_Na
 
 if calculate_thermal_scan
     number_of_calculation = length(Temperature);
     %UWAGA! poni¿sza wartoœæ bêdzie najmniejsza dla najwiêkszych temperatur
     %       trzeba pamiêtaæ o tym, ¿eby w "Temperature" na pozycji 1 by³a 
     %       najwiêksza temperatura
+    ni = ni_fun(Temperature(1),e_eff_mass,h_eff_mass,Eg,k);
     max_non_degenerate_Na = ni*exp(Eg/(2*k*Temperature(1)));
 
     Na   = exp(19*log(10):0.1:log(max_non_degenerate_Na));
@@ -109,16 +104,18 @@ if calculate_thermal_scan
     W    = zeros(length(Na),number_of_calculation)';
     Vb   = zeros(length(Na),number_of_calculation)';
     Ef   = zeros(length(Na),number_of_calculation)';
-    Fermi_graniczny = k*T*log(ni./Na)/q;
+    
 
     %sklejanie gdy idziemy od ma³ego domieszkowania w górê
     %sklejamy poziomem fermiego
     for i=1:number_of_calculation
-    [pgb(i,:),p_L2(i,:),W(i,:),Vb(i,:),Ef(i,:)] = sove_problem_for_all_Na(...
+        ni = ni_fun(Temperature(i),e_eff_mass,h_eff_mass,Eg,k);
+        Fermi_graniczny = k*Temperature(i)*log(ni./Na)/q;
+        [pgb(i,:),p_L2(i,:),W(i,:),Vb(i,:),Ef(i,:)] = sove_problem_for_all_Na(...
                                     Na,pgb(i,:),p_L2(i,:),W(i,:),Vb(i,:),Ef(i,:),Fermi_graniczny,...
                                     ni,Temperature(i),delta,L,Qt,Et,delta_Et,Eg,epsR,deltaE,q,uc,ugb);
     end
-    [Ea, all_mobilities] = calculate_activation_energy(Na,length(Na),Temperature,W,L,delta,Vb,uc,ugb,p_L2,pgb);
+    [Ea, all_mobilities] = calculate_activation_energy(length(Na),Temperature,W,L,delta,Vb,uc,ugb,p_L2,pgb);
 else
     number_of_calculation = 1;
     max_non_degenerate_Na = ni*exp(Eg/(2*k*T));
@@ -195,7 +192,9 @@ end
 % title('Warstwa zubo¿ona ~ domieszkowania')
 % 
 % subplot(1,3,3)
-% loglog(Na/1e6,p_L2)
+figure
+loglog(Na/1e6,p_L2/1e6)
+xline(8e14)
 % title('p(L/2) ~ domieszkowania')
 % % title('Poziom Fermiego ~ domieszkowania')
 
@@ -203,10 +202,19 @@ end
 % semilogx(Na/1e6,Vb)
 
 %semilogx(Na/1e6,Ef)
-
+figure
 semilogx(Na(1,:)/1e6,Ea(1,:))
+xline(8e14)
 title('Energia aktywacji ~ domieszkowania')
 %% FUNKCJE
+   function ni = ni_fun(T,e_eff_mass,h_eff_mass,Eg,k)
+        %efektywna gêstoœæ stanów pas przewodnictwa w cm-3
+        Nc = 2.5*10^19*((e_eff_mass)^(3/2))*(T/300)^(3/2);
+        %efektywna gêstoœæ stanów pas walencyjny w cm-3
+        Nv= 2.5*10^19*((h_eff_mass)^(3/2))*(T/300)^(3/2);
+        % gêstoœæ noœników w przewodnik samoistnym w m-3
+        ni = sqrt(Nv*Nc)*exp(-Eg/(2*k*T))*1e6;
+   end
    function Vb = Vb_fun(Na,W)
         q    = 1.6021766208*10^(-19);
         eps  = 8.85*10^-12;%A^2 s^4 / kh m^3 
@@ -265,7 +273,7 @@ title('Energia aktywacji ~ domieszkowania')
             is_fermi_small_enough = true;
             while i <= length(Na_x) && is_fermi_small_enough == true
                 Ef_x(i)   = Fermi_graniczny_x(i);
-                p_L2_x(i) = p_L2_fun(ni,Ef_x(i),T);
+                p_L2_x(i) = Na_x(i);%p_L2_fun(ni,Ef_x(i),T);
                 W_x(i)    = findW(Na_x(i), T, delta, L, Qt, Et, delta_Et, Eg,epsR);
                 Vb_x(i)   = Vb_fun(Na_x(i),W_x(i));
                 pgb_x(i)  = pgb_fun(p_L2_x(i),Vb_x(i),deltaE,T);
@@ -290,7 +298,7 @@ title('Energia aktywacji ~ domieszkowania')
        Vb = Vb_x;
        Ef = Ef_x;
    end
-   function [Ea, all_mobilities] = calculate_activation_energy(Na,max_Na,T,W,L,delta,Vb,uc,ugb,p_L2,pgb)
+   function [Ea, all_mobilities] = calculate_activation_energy(max_Na,T,W,L,delta,Vb,uc,ugb,p_L2,pgb)
     
     all_mobilities = zeros(length(T),max_Na);
     for i=1:length(T)
