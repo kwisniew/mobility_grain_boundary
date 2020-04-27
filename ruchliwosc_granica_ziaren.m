@@ -2,13 +2,15 @@
 %TYLKO KILKA PARAMETRÓW WYSTÊPUJE JAKO ZMIENNA W OBLICZENIACH
 %S¥ TO: "Na", "Qt", "T", "delta", "Et" i "L"
 
+    % ³adunek elementarny
+    q=1.6021766208*10^(-19); %C
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     %ZMIENNE
     %temperatura
     % UWAGA: ka¿da zmiana T powoduje, ¿e
     %        trzeba jeszcze raz przeliczyæ ca³ki w Mathematice!!!
     Temperature = [300,250,200,150,100];
-    T=Temperature(1);%K
+    T=Temperature(5);%K
     %szerokoœæ ziarna
     L=0.87e-6;%m
     %szerokoœæ granicy ziarna
@@ -28,10 +30,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %obliczeniowe
     calculate_thermal_scan = true;
+    S=0.025*1e-4;
 
     %Sta³e Fizyczne    
-    % ³adunek elementarny
-    q=1.6021766208*10^(-19); %C
     %sta³a boltzmana
     k = 1.38064852*10^(-23); %J/K
     %przenikalnoœæ elektryczna
@@ -172,9 +173,10 @@ end
 % end
 %% WYKRESY:
 % subplot(1,3,1)
-% loglog(Na/1e6,u_fun(uc, ...
-%                 Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
-%                 Fc_fun(W,L,delta,Vb,T))*1e4)
+loglog(Na/1e6,u_fun(uc, ...
+                Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
+                Fc_fun(W,L,delta,Vb,T))*1e4)
+xline(8e14);
 % title('ruchliwosc ~ domieszkowania')
 % 
 % fileID = fopen('mobility_100K.txt','w');
@@ -186,15 +188,16 @@ end
 
 
 % subplot(1,3,2)
-% semilogx(Na/1e6,Vb(5,:))
+% semilogx(Na/1e6,Vb)
+% xline(8e14);
 % title('bariera ~ domieszkowania')
 % loglog(Na/1e6,W)
 % title('Warstwa zubo¿ona ~ domieszkowania')
 % 
 % subplot(1,3,3)
-figure
-loglog(Na/1e6,p_L2/1e6)
-xline(8e14)
+% figure
+% loglog(Na/1e6,p_L2/1e6)
+% xline(8e14);
 % title('p(L/2) ~ domieszkowania')
 % % title('Poziom Fermiego ~ domieszkowania')
 
@@ -202,10 +205,41 @@ xline(8e14)
 % semilogx(Na/1e6,Vb)
 
 %semilogx(Na/1e6,Ef)
-figure
-semilogx(Na(1,:)/1e6,Ea(1,:))
-xline(8e14)
-title('Energia aktywacji ~ domieszkowania')
+% figure
+if calculate_thermal_scan
+    semilogx(Na(1,:)/1e6,Ea(1,:))
+    xline(8e14);
+    title('Energia aktywacji ~ domieszkowania')
+    my_index=find(abs(Na-8e14*1e6)< 0.2e15*1e6);
+    Na(my_index)/1e6
+    Ea(1,my_index)
+
+    %semilogy(1./Temperature, all_mobilities(:,my_index(4))', '*','MarkerSize',10)
+    my_Ea = zeros(2,1);
+    my_Ea(1) = -Ea(1,my_index(4))*q/k;
+    my_Ea(2) =  Ea(2,my_index(4));
+    y_est_mob = polyval(my_Ea,1./Temperature);
+    % hold on
+    % semilogy(1./Temperature,exp(y_est),'--','LineWidth',2)
+
+    amplitudy = [2484, 1282, 618, 316, 164, 77, 39, 20];
+    temperatury = [166.08, 148.34, 136.08, 125.03, 120.58, 110.66, 100.73, 90.832];
+    c = polyfit(1./temperatury,log(amplitudy),1);
+    y_est = polyval(c,1./temperatury);
+
+    figure
+    yyaxis left
+    semilogy(1./Temperature, all_mobilities(:,my_index(4))', '*',    1./Temperature, exp(y_est_mob),'-')
+
+    yyaxis right
+    semilogy(1./temperatury,amplitudy, 'x',1./temperatury,exp(y_est),'-')
+    % semilogy(1./temperatury,exp(y_est),'--','LineWidth',2)
+    % hold off
+    
+
+    
+end
+
 %% FUNKCJE
    function ni = ni_fun(T,e_eff_mass,h_eff_mass,Eg,k)
         %efektywna gêstoœæ stanów pas przewodnictwa w cm-3
