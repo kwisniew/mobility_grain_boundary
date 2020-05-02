@@ -6,19 +6,20 @@
     q=1.6021766208*10^(-19); %C
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     %ZMIENNE
-    %temperatura
+    %temperatura (musi byæ od najwiêkszej do najmniejszej)
     % UWAGA: ka¿da zmiana T powoduje, ¿e
     %        trzeba jeszcze raz przeliczyæ ca³ki w Mathematice!!!
-    Temperature = [300,250,200,150,100];
+%     Temperature = [300,250,200,150,100];
+    Temperature = [200,175,150,125,100];
     T=Temperature(5);%K
     %szerokoœæ ziarna
     L=1e-6;%m
     %szerokoœæ granicy ziarna
     delta=2e-9;%m
     % gêstoœæ przestrzenna ³adunku na granicy ziaren 
-    Qt=0.2e10*1e4;%m^-2
+    Qt=1e10*1e4;%m^-2
     % po³o¿enie Et wzglêdem Ei
-    Et=0.25*q;%eV
+    Et=0.3*q;%eV
     % szerokoœæ po³ówkowa 
     % UWAGA: ka¿da zmiana delta_Et (bazowo: 0.083q) powoduje, ¿e
     %        trzeba jeszcze raz przeliczyæ ca³ki w Mathematice!!!
@@ -102,7 +103,8 @@ if calculate_thermal_scan
     Na   = exp(19*log(10):0.1:log(max_non_degenerate_Na));
     %Dla du¿ego przybli¿enia na osi Na, mo¿na u¿yæ poni¿szych wartoœci dla
     %akceptorów
-    %Na   = 1.3e19*linspace(1,2.5,6000);
+%     Na   = 1.3e19*linspace(1,2.5,6000);
+%     Na   = 5e19*linspace(1,3,1000);
     pgb  = zeros(length(Na),number_of_calculation)';
     p_L2 = zeros(length(Na),number_of_calculation)';
     W    = zeros(length(Na),number_of_calculation)';
@@ -177,41 +179,23 @@ end
 %% WYKRESY:
 % subplot(1,3,1)
 figure(1)
-loglog(Na/1e6,u_fun(uc, ...
-                Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
-                Fc_fun(W,L,delta,Vb,T))*1e4)
-%xline(8e14);
- title('ruchliwosc ~ domieszkowania')
-% 
-% fileID = fopen('mobility_100K.txt','w');
-% data = [Na/1e6;u_fun(uc, ...
-%                 Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
-%                 Fc_fun(W,L,delta,Vb,T))*1e4];
-% fprintf(fileID,'%f %f\n',data);
-% fclose(fileID);
+    semilogx(Na/1e6,all_mobilities*1e4)
+    title('ruchliwosc ~ domieszkowania')
 
-
-% subplot(1,3,2)
 figure(2)
-semilogx(Na/1e6,Vb)
-% xline(8e14);
- title('bariera ~ domieszkowania')
+    semilogx(Na/1e6,Vb)
+    title('bariera ~ domieszkowania')
+
 % loglog(Na/1e6,W)
 % title('Warstwa zubo¿ona ~ domieszkowania')
 % 
-% subplot(1,3,3)
-% figure
 figure(3)
-loglog(Na/1e6,p_L2/1e6)
-% xline(8e14);
- title('p(L/2) ~ domieszkowania')
-% % title('Poziom Fermiego ~ domieszkowania')
-
-% figure
-% semilogx(Na/1e6,Vb)
+    loglog(Na/1e6,p_L2/1e6)
+    title('p(L/2) ~ domieszkowania')
 
 %semilogx(Na/1e6,Ef)
-% figure
+% title('Poziom Fermiego ~ domieszkowania')
+
 if calculate_thermal_scan
 %     semilogx(Na(1,:)/1e6,Ea(1,:))
 %     xline(8e14);
@@ -220,13 +204,13 @@ if calculate_thermal_scan
 %     Na(my_index)/1e6
 %     Ea(1,my_index)
 
-    %semilogy(1./Temperature, all_mobilities(:,my_index(4))', '*','MarkerSize',10)
+%semilogy(1./Temperature, all_mobilities(:,my_index(4))', '*','MarkerSize',10)
 %     my_Ea = zeros(2,1);
 %     my_Ea(1) = -Ea(1,my_index(4))*q/k;
 %     my_Ea(2) =  Ea(2,my_index(4));
 %     y_est_mob = polyval(my_Ea,1./Temperature);
-    % hold on
-    % semilogy(1./Temperature,exp(y_est),'--','LineWidth',2)
+% hold on
+% semilogy(1./Temperature,exp(y_est),'--','LineWidth',2)
 
 %DANE DOŒWIADCZALNE - po prostu przeklei³em
     amplitudy = [2484, 1282, 618, 316, 164, 77, 39, 20];
@@ -242,6 +226,7 @@ if calculate_thermal_scan
 %     semilogy(1./temperatury,amplitudy, 'x',1./temperatury,exp(y_est),'-')
     % semilogy(1./temperatury,exp(y_est),'--','LineWidth',2)
     % hold off
+    
 % 3 ro¿ne podejœcia do wyliczania pr¹du nasycenia: 1) zmienne p(L/2) i Vb,
 % 2) zmienne tylko Vb (_v2) i 3) zmienna p(L/2), Vb, i ruchliwoœæ
     Ea_Io = zeros(2,length(Na));
@@ -251,36 +236,51 @@ if calculate_thermal_scan
         Ea_Io(:,i)    = polyfit(1./Temperature',log( p_L2(:,i).*uc                  .*exp(-q*Vb(:,i)./(k*Temperature')).*Emax(Vb(:,i),0,Na(i),epsR*eps) ),1);
     end
     for i=1:length(Na)
-        Ea_Io_v2(:,i) = polyfit(1./Temperature',log( 1e25      *uc*0.0001           .*exp(-q*Vb(:,i)./(k*Temperature')) ),1);
+        Ea_Io_v2(:,i) = polyfit(1./Temperature',log( 1e25      *uc*0.0001           .*exp(-q*Vb(:,i)./(k*Temperature')).*Emax(Vb(:,i),0,Na(i),epsR*eps) ),1);
     end
     for i=1:length(Na)
-        Ea_Io_v3(:,i) = polyfit(1./Temperature',log(  p_L2(:,i).*all_mobilities(:,i).*exp(-q*Vb(:,i)./(k*Temperature'))),1);
+        Ea_Io_v3(:,i) = polyfit(1./Temperature',log(  p_L2(:,i).*all_mobilities(:,i).*exp(-q*Vb(:,i)./(k*Temperature')).*Emax(Vb(:,i),0,Na(i),epsR*eps)),1);
     end
 
     
     figure(4)
-     semilogx(Na/1e6,-Ea_Io_v3(1,:)*k/q)
-%     semilogx(Na/1e6,-Ea_Io_v2(1,:)*k/q)
-%     semilogx(Na/1e6,Vb)
-%     semilogx(Na/1e6,-Ea_Io(1,:)*k/q)
-    yline(0.1);
-    title('Ea ~ domieszkowania')
+        semilogx(Na/1e6,-Ea_Io_v3(1,:)*k/q)
+    %    semilogx(Na/1e6,-Ea_Io_v2(1,:)*k/q)
+    %    semilogx(Na/1e6,-Ea_Io(1,:)*k/q)
+        yline(0.09);
+        title('Ea ~ domieszkowania')
     
-    
+    S=0.28*1e-4;%powierzchnia próbki w m2
+    %aby mieæ dobre jednoski dla Io/S, w [mA/cm2] muszê pomno¿yæ moje wyniki
+    %które równaj¹ siê Io/(qS) przez q, uzyskam jednostki A/m2, muszê
+    %jeszcze zamieniæ m2 na cm2 czyli pomno¿yæ wszystko przez 1e-4 i aby
+    %mieæ mA, mno¿ê wszystko przez 1e3, czyli mno¿e ostatecznie przez 1e-1
     figure(5)
-    semilogx( Na/1e6,log10(exp(Ea_Io_v3(2,:))) )
-%     semilogx( Na/1e6,log10(exp(Ea_Io(2,:))) )
-    title('log10(Io) ~ domieszkowania')
-%     plot(1./Temperature', log( p_L2(:,20).*uc*0.01.*exp(-q*Vb(:,20)./(k*Temperature')) ))
+%        semilogx( Na/1e6,log10(exp(Ea_Io_v3(2,:))) )
+        loglog( Na/1e6,exp(Ea_Io_v3(2,:))*q*1e-1 )
+%        semilogx( Na/1e6,log10(exp(Ea_Io(2,:))) )
+%        title('log10(Io) ~ domieszkowania')
+    title('Io[mA/cm2] ~ domieszkowania')
+    
+
+    tmp=find(-Ea_Io_v3(1,:)*k/q<0.095,1)';    
+    figure(6)
+        semilogy(1./Temperature', p_L2(:,tmp).*all_mobilities(:,tmp).*exp(-q*Vb(:,tmp)./...
+        (k*Temperature')).*Emax(Vb(:,tmp),0,Na(tmp),epsR*eps),'x','MarkerSize',12)
+        hold on
+        y_est = polyval(Ea_Io_v3(:,tmp),1./Temperature);
+        semilogy(1./Temperature,exp(y_est)','--','LineWidth',2)
+        hold off
+        title('Przykladowy Arrhenius')
 %     x = polyfit(1./Temperature', log( p_L2(:,44).*uc.*exp(-q*Vb(:,44)./(k*Temperature')) ),1)
 
-tmp = find(-Ea_Io(1,1:(length(Ea_Io)-20))*k/q>0.085)';
-tmp=max(tmp);
-% Ea z doœwiadczenia to oko³o 0.875
-fprintf('Poni¿ej wyszukuje pierwszy Ea, który jest wiêkszy ni¿ 0.085\n');
-fprintf('Indeks elementu, ktorego Ea jest najbli¿ej 0.085eV:\n %d \n',tmp);
-fprintf('Energia aktywacji w poboli¿u tego elementu: \n %f  %f %f %f %f\n',(-Ea_Io(1,(tmp-2:tmp+2))*k/q));
-fprintf('pr¹d nasycenia (Io/Sq) w pobli¿u dla tego elementu: \n %e %e %e %e %e\n',exp(Ea_Io(2,(tmp-2:tmp+2))));
+    % Ea z doœwiadczenia to oko³o 0.875
+    fprintf('\nPoni¿ej wyszukuje pierwszy Ea, który jest mniejszy ni¿ 0.095\n');
+    fprintf('Indeks elementu, ktorego Ea jest najbli¿ej 0.085eV:\n %d \n',tmp);
+    fprintf('Energia aktywacji w poboli¿u tego elementu: \n %f  %f %f %f %f\n',(-Ea_Io_v3(1,(tmp-2:tmp+2))*k/q));
+    fprintf('pr¹d nasycenia (Io/Sq) w pobli¿u dla tego elementu: \n %e %e %e %e %e\n',exp(Ea_Io_v3(2,(tmp-2:tmp+2))));
+    fprintf('domieszkowanie dla tego elementu [cm-3]: \n %e \n',Na(tmp)/1e6);
+
 %(-c(1)*k/q)
 %exp(c(2))
 end
@@ -382,7 +382,7 @@ end
     for i=1:length(T)
        all_mobilities(i,1:max_Na)= u_fun(uc, ...
                                          Fgb_fun(delta,L,uc,ugb,p_L2(i,1:max_Na),pgb(i,1:max_Na)), ...
-                                         Fc_fun(W(i,1:max_Na),L,delta,Vb(i,1:max_Na),T(i)))*1e4;
+                                         Fc_fun(W(i,1:max_Na),L,delta,Vb(i,1:max_Na),T(i)));
     end
     Ea = zeros(2,max_Na);
     for i=1:max_Na
@@ -429,7 +429,24 @@ end
 %                                 delta*ni*exp(-q*Ef/(k*T))*exp(-(q*Vb-deltaE)/(k*T));
 %     end
 %% Kod przydatny, acz ju¿ nie wykorzystywany
-    
+
+    %tmp = find(-Ea_Io_v3(1,1:(length(Ea_Io_v3)-20))*k/q>0.085)';
+    %tmp=max(tmp);
+
+% 
+% fileID = fopen('mobility_100K.txt','w');
+% data = [Na/1e6;u_fun(uc, ...
+%                 Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
+%                 Fc_fun(W,L,delta,Vb,T))*1e4];
+% fprintf(fileID,'%f %f\n',data);
+% fclose(fileID);
+
+
+% loglog(Na/1e6,u_fun(uc, ...
+%                 Fgb_fun(delta,L,uc,ugb,p_L2,pgb), ...
+%                 Fc_fun(W,L,delta,Vb,T))*1e4)
+
+
 %     fprintf('Gêstoœæ noœników na granicy ziarna:  %e cm^-3\n', pgb_fun(p_L2,Vb,deltaE,T)/1e6);
 %     fprintf('Warstwa zubo¿ona:  %f um\n', W_fun(eps,epsR,Vb,Na)*1e6);
 %     fprintf('Fc: %f\n', Fc_fun(W,L,delta,Vb,T));
