@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     27840,        872]
-NotebookOptionsPosition[     26869,        834]
-NotebookOutlinePosition[     27249,        850]
-CellTagsIndexPosition[     27206,        847]
+NotebookDataLength[     28123,        876]
+NotebookOptionsPosition[     27152,        838]
+NotebookOutlinePosition[     27532,        854]
+CellTagsIndexPosition[     27489,        851]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -689,7 +689,7 @@ Cell[BoxData[{
      RowBox[{"(", 
       RowBox[{"-", "23"}], ")"}]}]}]}], ";"}], "\n", 
  RowBox[{
-  RowBox[{"T", "=", "200"}], ";"}], "\n", 
+  RowBox[{"T", "=", "175"}], ";"}], "\n", 
  RowBox[{
   RowBox[{"deltaEt", "=", 
    RowBox[{"0.083", "*", "q"}]}], ";"}], "\n", 
@@ -790,50 +790,54 @@ Cell[BoxData[{
          SuperscriptBox["a", "2"], "+", "c"}]]]}], ")"}]}]}], "]"}]}], "Input",
  CellChangeTimes->{{3.7945788943145847`*^9, 3.7945788981783595`*^9}, {
   3.794579082476242*^9, 3.7945791204733953`*^9}, {3.794579525278055*^9, 
-  3.7945795258247733`*^9}, {3.7945838247693167`*^9, 3.7945838248322783`*^9}}],
+  3.7945795258247733`*^9}, {3.7945838247693167`*^9, 3.7945838248322783`*^9}, {
+  3.794584133553831*^9, 3.79458413368779*^9}, {3.7945845152083445`*^9, 
+  3.794584515292262*^9}, {3.7974311746547422`*^9, 3.7974311900829906`*^9}}],
 
-Cell[BoxData["0.43219265711562116`"], "Output",
- CellChangeTimes->{3.7945791220874314`*^9, 3.7945795293816915`*^9}],
+Cell[BoxData["0.17287706284624849`"], "Output",
+ CellChangeTimes->{3.7945791220874314`*^9, 3.7945795293816915`*^9, 
+  3.7945838289499073`*^9, 3.794584136503133*^9, 3.7945845177288585`*^9}],
 
 Cell[BoxData[
- RowBox[{"2.0505367475867886`", "\[VeryThinSpace]", "-", 
-  RowBox[{"1.0473722191750001`", " ", 
+ RowBox[{"5.12634186896697`", "\[VeryThinSpace]", "-", 
+  RowBox[{"2.06901425394033`", " ", 
    SuperscriptBox["\[ExponentialE]", 
     RowBox[{
      RowBox[{"(", 
-      RowBox[{"0.33868297138936443`", "\[VeryThinSpace]", "-", 
-       RowBox[{"0.06513134065180083`", " ", "b"}]}], ")"}], " ", "b"}]]}], 
+      RowBox[{"0.1196503988940125`", "\[VeryThinSpace]", "-", 
+       RowBox[{"0.023009692095002404`", " ", "b"}]}], ")"}], " ", "b"}]]}], 
   "+", 
   RowBox[{
    SuperscriptBox["\[ExponentialE]", 
     RowBox[{
      RowBox[{"(", 
       RowBox[{
-       RowBox[{"-", "0.3386829713893645`"}], "-", 
-       RowBox[{"0.06513134065180086`", " ", "b"}]}], ")"}], " ", "b"}]], " ", 
+       RowBox[{"-", "0.11965039889401251`"}], "-", 
+       RowBox[{"0.023009692095002404`", " ", "b"}]}], ")"}], " ", "b"}]], " ", 
    RowBox[{"(", 
-    RowBox[{"1.0473722191750001`", "\[VeryThinSpace]", "-", 
-     RowBox[{"1.0473722191750001`", " ", 
+    RowBox[{"2.06901425394033`", "\[VeryThinSpace]", "-", 
+     RowBox[{"2.06901425394033`", " ", 
       RowBox[{"Erf", "[", 
-       RowBox[{"0.48550194355308846`", "\[VeryThinSpace]", "-", 
-        RowBox[{"0.3487967204732006`", " ", "b"}]}], "]"}]}]}], ")"}]}], "+", 
-  RowBox[{"1.0473722191750001`", " ", 
+       RowBox[{"0.7214253124459826`", "\[VeryThinSpace]", "-", 
+        RowBox[{"0.08292639364727822`", " ", "b"}]}], "]"}]}]}], ")"}]}], "+", 
+  RowBox[{"2.06901425394033`", " ", 
    SuperscriptBox["\[ExponentialE]", 
     RowBox[{
      RowBox[{"(", 
-      RowBox[{"0.33868297138936443`", "\[VeryThinSpace]", "-", 
-       RowBox[{"0.06513134065180083`", " ", "b"}]}], ")"}], " ", "b"}]], " ", 
+      RowBox[{"0.1196503988940125`", "\[VeryThinSpace]", "-", 
+       RowBox[{"0.023009692095002404`", " ", "b"}]}], ")"}], " ", "b"}]], " ", 
    RowBox[{"Erf", "[", 
-    RowBox[{"0.48550194355308846`", "\[VeryThinSpace]", "+", 
-     RowBox[{"0.3487967204732006`", " ", "b"}]}], "]"}]}], "-", 
-  RowBox[{"2.0505367475867886`", " ", 
+    RowBox[{"0.7214253124459826`", "\[VeryThinSpace]", "+", 
+     RowBox[{"0.08292639364727822`", " ", "b"}]}], "]"}]}], "-", 
+  RowBox[{"5.12634186896697`", " ", 
    RowBox[{"Erf", "[", 
-    RowBox[{"0.43219265711562116`", " ", "b"}], "]"}]}]}]], "Output",
- CellChangeTimes->{3.7945791220874314`*^9, 3.7945795294446554`*^9}]
+    RowBox[{"0.17287706284624849`", " ", "b"}], "]"}]}]}]], "Output",
+ CellChangeTimes->{3.7945791220874314`*^9, 3.7945795293816915`*^9, 
+  3.7945838289499073`*^9, 3.794584136503133*^9, 3.794584517792822*^9}]
 }, Open  ]]
 },
 WindowSize->{1440, 817},
-WindowMargins->{{-1510, Automatic}, {Automatic, 78}},
+WindowMargins->{{-1510, Automatic}, {Automatic, 70}},
 Magnification:>1.2 Inherited,
 FrontEndVersion->"10.4 for Microsoft Windows (64-bit) (February 25, 2016)",
 StyleDefinitions->"Default.nb"
@@ -870,9 +874,9 @@ Cell[15625, 490, 2898, 90, 329, "Input"],
 Cell[18526, 582, 2659, 80, 127, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[21222, 667, 4061, 125, 536, "Input"],
-Cell[25286, 794, 115, 1, 36, "Output"],
-Cell[25404, 797, 1449, 34, 63, "Output"]
+Cell[21222, 667, 4210, 127, 536, "Input"],
+Cell[25435, 796, 188, 2, 36, "Output"],
+Cell[25626, 800, 1510, 35, 63, "Output"]
 }, Open  ]]
 }
 ]

@@ -1,68 +1,40 @@
-Ef       = -0.015901907378312;
-delta_Qt = 3.5927e+14;
-p_L2     = 2.2855e+16;
-pgb      = 9.0209e+16;
+fis = 0.07;
+A = 2e-6;
+c = polyfit(1./Temperature', ...
+            log(A*uc*Nv(Temperature).*...
+            Emax(fis,0,1e21,epsR*eps).*...
+            exp(-q*fis./(k*Temperature)) )'...
+            ,1);
+figure(6)
+plot(1./Temperature', log(A*uc*Nv(Temperature).*...
+                      Emax(fis,0,1e21,epsR*eps).*...
+                      exp(-q*fis./(k*Temperature)) )')
+(-c(1)*k/q)
+exp(c(2))
 
-%glówny parametr:
-Na=1e21; %m^-3
+c = polyfit(1./Temperature',log(all_mobilities(:,tmp)),1);
+plot(1./Temperature', log(all_mobilities(:,tmp)))
 
-q=1.6021766208*10^(-19);
-k = 1.38064852*10^(-23); %J/K
-T=300;%K
-eps = 13*8.85*10^-12;%A^2 s^4 / kh m^3 
-epsR = 12;
-e_eff_mass = 0.09;
-h_eff_mass = 0.72;
-Nc = 2.5*10^19*((e_eff_mass)^(3/2))*(T/300)^(3/2);
-Nv= 2.5*10^19*((h_eff_mass)^(3/2))*(T/300)^(3/2);
-Eg = 1*q;
-ni = sqrt(Nv*Nc)*exp(-Eg/(2*k*T))*1e6;
-
-%szerokoœæ ziarna:
-L=1e-6;%m
-%szerokoœc granicy miêdzy ziarnami:
-delta=1e-7;%m  
-deltaE = 0.05*q;
-
-Vb = q*Na*L^2/(8*eps*epsR);
-%PARAMETRY BEZPOŒREDNIE (potrzebne do policzenia Ef i tylko tyle)
-Et=0.0*q;
-delta_Et = 0.08*q;
-delta_eps = delta_Et/(2*sqrt( log(2) ));
-Qt=1e13*1e4;
-% lambda_2_0     = Et/delta_eps;
-% lambda_2_minus = ( 0.26*delta_eps/(k*T) - lambda_2_0 )/sqrt( 1+0.1*(delta_eps/k*T)^2 );
-% lambda_2_plus  = ( 0.26*delta_eps/(k*T) + lambda_2_0 )/sqrt( 1+0.1*(delta_eps/k*T)^2 );
-% 
-% %zmienne zale¿ne od Ef (wiêc bêd¹ zmienne w równaniu)
-% lambda_2_0_Ef = (q*Ef+Et+q*Vb)/delta_eps;
-% lambda_2_minus_Ef = ( 0.26*delta_eps/(k*T) - lambda_2_0_Ef )/sqrt( 1+0.1*(delta_eps/k*T)^2 );
-% lambda_2_plus_Ef  = ( 0.26*delta_eps/(k*T) + lambda_2_0_Ef )/sqrt( 1+0.1*(delta_eps/k*T)^2 );
-% 
-% 
-% G_Ef = erfc(sqrt(lambda_2_0_Ef))+0.5*exp(lambda_2_0_Ef)*( ...
-%                                             exp(lambda_2_minus_Ef)*erfc(sqrt(lambda_2_minus_Ef)) ...
-%                                           - exp(lambda_2_plus_Ef )*erfc(sqrt(lambda_2_plus_Ef )));
-% 
-% G_0  = erfc(sqrt(lambda_2_0   ))+0.5*exp(lambda_2_0   )*( ...
-%                                             exp(lambda_2_minus   )*erfc(sqrt(lambda_2_minus   )) ...
-%                                           - exp(lambda_2_plus    )*erfc(sqrt(lambda_2_plus    )));
-b1 = (q*Ef+Et+q*Vb)/(k*T);                                       
-Q1 =  1.64696 - 0.844494 * exp((0.386513 - 0.0743295 * b1)* b1) + ... 
-      exp((-0.386513 - 0.0743295 *b1) *b1) * (0.844494 - 0.844494 * erf(0.416573 - 0.46392*b1)) + ...
-      0.844494 * exp((0.386513 - 0.0743295 *b1) *b1)* erf(0.416573 + 0.46392 * b1) - ... 
-      1.64696 * erf(0.5381 * b1);
-b2 = (Et)/(k*T);                                       
-Q2 =  1.64696 - 0.844494 * exp((0.386513 - 0.0743295 * b2)* b2) + ... 
-      exp((-0.386513 - 0.0743295 *b2) *b2) * (0.844494 - 0.844494 * erf(0.416573 - 0.46392*b2)) + ...
-      0.844494 * exp((0.386513 - 0.0743295 *b2) *b2)* erf(0.416573 + 0.46392 * b2) - ... 
-      1.64696 * erf(0.5381 * b2);
-
-
-% pgb      - p_L2*exp(-(q*Vb-deltaE)/(k*T))
-% p_L2     - ni*exp(-q*Ef/(k*T))
-% %delta_Qt - 0.5*Qt*(G_Ef - G_0)
-% delta_Qt - Qt*(k*T/(sqrt(pi)*delta_eps))*(Q1-Q2)
-% Na*L     - delta_Qt - delta*pgb
-
-Na*L -  Qt*(k*T/(sqrt(pi)*delta_eps))*(Q1-Q2) - delta*ni*exp(-q*Ef/(k*T))*exp(-(q*Vb-deltaE)/(k*T))
+%% Do zapamiêtania
+    %ZMIENNE
+    %temperatura
+    % UWAGA: ka¿da zmiana T powoduje, ¿e
+    %        trzeba jeszcze raz przeliczyæ ca³ki w Mathematice!!!
+    Temperature = [300,250,200,150,100];
+    T=Temperature(5);%K
+    %szerokoœæ ziarna
+    L=1e-6;%m
+    %szerokoœæ granicy ziarna
+    delta=2e-9;%m
+    % gêstoœæ przestrzenna ³adunku na granicy ziaren 
+    Qt=0.2e10*1e4;%m^-2
+    % po³o¿enie Et wzglêdem Ei
+    Et=0.25*q;%eV
+    % szerokoœæ po³ówkowa 
+    % UWAGA: ka¿da zmiana delta_Et (bazowo: 0.083q) powoduje, ¿e
+    %        trzeba jeszcze raz przeliczyæ ca³ki w Mathematice!!!
+    delta_Et = 0.083*q;
+    %przerwa energetyczna
+    Eg = 1.20*q;
+    % przenikalnoœæ elektryczna wzglêdna
+    epsR = 13;
