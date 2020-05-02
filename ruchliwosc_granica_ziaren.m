@@ -260,6 +260,7 @@ if calculate_thermal_scan
         loglog( Na/1e6,exp(Ea_Io_v3(2,:))*q*1e-1 )
 %        semilogx( Na/1e6,log10(exp(Ea_Io(2,:))) )
 %        title('log10(Io) ~ domieszkowania')
+
     title('Io[mA/cm2] ~ domieszkowania')
     
 
