@@ -250,7 +250,11 @@ if calculate_thermal_scan
         yline(0.09);
         title('Ea ~ domieszkowania')
     
+<<<<<<< HEAD
     S=0.28*1e-4;%powierzchnia próbki w m2
+=======
+    S=0.28*1e-4%powierzchnia próbki w m2
+>>>>>>> 6693bff11bb99712543d2e5652f61006211e8c5e
     %aby mieæ dobre jednoski dla Io/S, w [mA/cm2] muszê pomno¿yæ moje wyniki
     %które równaj¹ siê Io/(qS) przez q, uzyskam jednostki A/m2, muszê
     %jeszcze zamieniæ m2 na cm2 czyli pomno¿yæ wszystko przez 1e-4 i aby
@@ -260,7 +264,10 @@ if calculate_thermal_scan
         loglog( Na/1e6,exp(Ea_Io_v3(2,:))*q*1e-1 )
 %        semilogx( Na/1e6,log10(exp(Ea_Io(2,:))) )
 %        title('log10(Io) ~ domieszkowania')
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6693bff11bb99712543d2e5652f61006211e8c5e
     title('Io[mA/cm2] ~ domieszkowania')
     
 
