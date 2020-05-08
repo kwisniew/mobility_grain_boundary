@@ -10,7 +10,7 @@
     % UWAGA: ka¿da zmiana T powoduje, ¿e
     %        trzeba jeszcze raz przeliczyæ ca³ki w Mathematice!!!
 %     Temperature = [300,250,200,150,100];
-    Temperature = [200,175,150,125,100];
+    Temperature = [200,187.5,175,162.5,150,137.5,125,112.5,100];
     T=Temperature(5);%K
     %szerokoœæ ziarna
     L=1e-6;%m
@@ -100,11 +100,11 @@ if calculate_thermal_scan
     ni = ni_fun(Temperature(1),e_eff_mass,h_eff_mass,Eg,k);
     max_non_degenerate_Na = ni*exp(Eg/(2*k*Temperature(1)));
 
-    Na   = exp(19*log(10):0.1:log(max_non_degenerate_Na));
+%     Na   = exp(19*log(10):0.1:log(max_non_degenerate_Na));
     %Dla du¿ego przybli¿enia na osi Na, mo¿na u¿yæ poni¿szych wartoœci dla
     %akceptorów
 %     Na   = 1.3e19*linspace(1,2.5,6000);
-%     Na   = 5e19*linspace(1,3,1000);
+    Na   = 5e19*linspace(1,3,4000);
     pgb  = zeros(length(Na),number_of_calculation)';
     p_L2 = zeros(length(Na),number_of_calculation)';
     W    = zeros(length(Na),number_of_calculation)';
@@ -214,19 +214,11 @@ if calculate_thermal_scan
 
 %DANE DOŒWIADCZALNE - po prostu przeklei³em
     amplitudy = [2484, 1282, 618, 316, 164, 77, 39, 20];
-    temperatury = [166.08, 148.34, 136.08, 125.03, 120.58, 110.66, 100.73, 90.832];
+    temperatury = [171.61, 154.99, 142.77, 130.56, 125.03, 115.06, 105.13, 95.235];
     c = polyfit(1./temperatury,log(amplitudy),1);
-    y_est = polyval(c,1./temperatury);
-
-%     figure
-%     yyaxis left
-%     semilogy(1./Temperature, all_mobilities(:,my_index(4))', '*',    1./Temperature, exp(y_est_mob),'-')
-% 
-%     yyaxis right
-%     semilogy(1./temperatury,amplitudy, 'x',1./temperatury,exp(y_est),'-')
-    % semilogy(1./temperatury,exp(y_est),'--','LineWidth',2)
-    % hold off
-    
+    temperatury_fit = [200,171.61, 154.99, 142.77, 130.56, 125.03, 115.06, 105.13, 95.235,90];
+    y_est = polyval(c,1./temperatury_fit);
+ 
 % 3 ro¿ne podejœcia do wyliczania pr¹du nasycenia: 1) zmienne p(L/2) i Vb,
 % 2) zmienne tylko Vb (_v2) i 3) zmienna p(L/2), Vb, i ruchliwoœæ
     Ea_Io = zeros(2,length(Na));
@@ -263,27 +255,78 @@ if calculate_thermal_scan
 %        title('log10(Io) ~ domieszkowania')
     title('Io[mA/cm2] ~ domieszkowania')
     
-
-    tmp=find(-Ea_Io_v3(1,:)*k/q<0.095,1)';    
+    Temp_Io_for_fit = [240,200,187.5,175,162.5,150,137.5,125,112.5,100,90];
+    maxEa = 0.1; 
+    tmp=find(-Ea_Io_v3(1,:)*k/q<maxEa,1)';    
     figure(6)
         semilogy(1./Temperature', p_L2(:,tmp).*all_mobilities(:,tmp).*exp(-q*Vb(:,tmp)./...
         (k*Temperature')).*Emax(Vb(:,tmp),0,Na(tmp),epsR*eps),'x','MarkerSize',12)
         hold on
-        y_est = polyval(Ea_Io_v3(:,tmp),1./Temperature);
-        semilogy(1./Temperature,exp(y_est)','--','LineWidth',2)
+        y_est_v3 = polyval(Ea_Io_v3(:,tmp),1./Temp_Io_for_fit);
+        semilogy(1./Temp_Io_for_fit,exp(y_est_v3)','--','LineWidth',2)
         hold off
         title('Przykladowy Arrhenius')
 %     x = polyfit(1./Temperature', log( p_L2(:,44).*uc.*exp(-q*Vb(:,44)./(k*Temperature')) ),1)
 
     % Ea z doœwiadczenia to oko³o 0.875
-    fprintf('\nPoni¿ej wyszukuje pierwszy Ea, który jest mniejszy ni¿ 0.095\n');
-    fprintf('Indeks elementu, ktorego Ea jest najbli¿ej 0.085eV:\n %d \n',tmp);
+    fprintf('\nPoni¿ej wyszukuje pierwszy Ea, który jest mniejszy ni¿ %f\n',maxEa);
+    fprintf('Indeks elementu, ktorego Ea jest najbli¿ej 0.095eV:\n %d \n',tmp);
     fprintf('Energia aktywacji w poboli¿u tego elementu: \n %f  %f %f %f %f\n',(-Ea_Io_v3(1,(tmp-2:tmp+2))*k/q));
-    fprintf('pr¹d nasycenia (Io/Sq) w pobli¿u dla tego elementu: \n %e %e %e %e %e\n',exp(Ea_Io_v3(2,(tmp-2:tmp+2))));
+    fprintf('pr¹d nasycenia (Io/Sq) w pobli¿u dla tego elementu: \n %f %f %f %f %f\n',q*1e-1*exp(Ea_Io_v3(2,(tmp-2:tmp+2))));
     fprintf('domieszkowanie dla tego elementu [cm-3]: \n %e \n',Na(tmp)/1e6);
 
 %(-c(1)*k/q)
 %exp(c(2))
+    fis = 0.08;
+    A = 2.5e-5;
+    c3 = polyfit(1./Temperature',log( Io_DLTS(A,uc,Temperature,fis,epsR,eps) )',1);
+    y_est_DLTS = polyval(c3,1./Temp_Io_for_fit);
+%     figure (6)
+%     yyaxis left
+%     semilogy( 1./Temperature,...
+%               Io_gb(p_L2(:,tmp),all_mobilities(:,tmp),Vb(:,tmp),Temperature,Na(tmp),epsR,eps),...
+%               '*',...
+%               1./Temperature,...
+%               1e-1*q*exp(y_est_v3),...
+%               '-',...
+%               1./Temperature,...
+%               Io_DLTS(A,uc,Temperature,fis,epsR,eps),...
+%               'o',...
+%               1./Temperature,...
+%               exp(y_est_DLTS),...
+%               '-')
+%     yyaxis right
+%     semilogy(1./temperatury,amplitudy, 'x',1./temperatury,exp(y_est),'-')
+    
+    fprintf('Energia aktywacji:\n dosw:   %f\n gbry:   %f\n diff:   %f\n',...
+            -c(1)*k/q, -Ea_Io_v3(1,tmp)*k/q, -c3(1)*k/q)
+    fprintf('Prad nasycenia:\n gbry   %f\n diff   %f\n',...
+    1e-1*q*exp(Ea_Io_v3(2,tmp)), exp(c3(2)))
+    %semilogy(1./temperatury,exp(y_est),'--','LineWidth',2)
+    
+    figure (6)
+        subplot(1,3,1)
+        semilogy( 1000./Temperature,...
+                  Io_gb(p_L2(:,tmp),all_mobilities(:,tmp),Vb(:,tmp),Temperature,Na(tmp),epsR,eps),...
+                  '*',...
+                  1000./Temp_Io_for_fit,...
+                  1e-1*q*exp(y_est_v3),...
+                  '-',...
+                  'MarkerSize',12)
+        grid on
+        subplot(1,3,2) 
+        semilogy( 1000./Temperature,...
+                  Io_DLTS(A,uc,Temperature,fis,epsR,eps),...
+                  'o',...
+                  1000./Temp_Io_for_fit,...
+                  exp(y_est_DLTS),...
+                  '-',...
+                  'MarkerSize',12)
+        grid on
+        subplot(1,3,3)
+        semilogy(1000./temperatury,amplitudy, 'x',1000./temperatury_fit,exp(y_est),...
+                 '-','MarkerSize',12)
+        grid on
 end
 %% FUNKCJE
    function ni = ni_fun(T,e_eff_mass,h_eff_mass,Eg,k)
@@ -430,6 +473,17 @@ end
 %                                 delta*ni*exp(-q*Ef/(k*T))*exp(-(q*Vb-deltaE)/(k*T));
 %     end
 %% Kod przydatny, acz ju¿ nie wykorzystywany
+
+%     figure 6
+%     yyaxis left
+%     semilogy(1./Temperature, all_mobilities(:,my_index(4))', '*',    1./Temperature, exp(y_est_mob),'-')
+% 
+%     yyaxis right
+%     semilogy(1./temperatury,amplitudy, 'x',1./temperatury,exp(y_est),'-')
+%     semilogy(1./temperatury,exp(y_est),'--','LineWidth',2)
+%     hold off
+
+
 
     %tmp = find(-Ea_Io_v3(1,1:(length(Ea_Io_v3)-20))*k/q>0.085)';
     %tmp=max(tmp);
