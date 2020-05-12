@@ -31,7 +31,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %obliczeniowe
     calculate_thermal_scan = true;
-    S=0.025*1e-4;
+    S=0.028*1e-4;
 
     %Sta³e Fizyczne    
     %sta³a boltzmana
@@ -98,9 +98,10 @@ if calculate_thermal_scan
     %       trzeba pamiêtaæ o tym, ¿eby w "Temperature" na pozycji 1 by³a 
     %       najwiêksza temperatura
     ni = ni_fun(Temperature(1),e_eff_mass,h_eff_mass,Eg,k);
-    max_non_degenerate_Na = ni*exp(Eg/(2*k*Temperature(1)));
+%     max_non_degenerate_Na = ni*exp(Eg/(2*k*Temperature(1)));
+%     max_non_degenerate_Na = 1e16*1e6;
 
-%     Na   = exp(19*log(10):0.1:log(max_non_degenerate_Na));
+%     Na   = exp(18*log(10):0.1:log(max_non_degenerate_Na));
     %Dla du¿ego przybli¿enia na osi Na, mo¿na u¿yæ poni¿szych wartoœci dla
     %akceptorów
 %     Na   = 1.3e19*linspace(1,2.5,6000);
@@ -192,6 +193,7 @@ figure(2)
 figure(3)
     loglog(Na/1e6,p_L2/1e6)
     title('p(L/2) ~ domieszkowania')
+    xline(1e14)
 
 %semilogx(Na/1e6,Ef)
 % title('Poziom Fermiego ~ domieszkowania')
@@ -243,7 +245,7 @@ if calculate_thermal_scan
         title('Ea ~ domieszkowania')
     
 
-    S=0.28*1e-4;%powierzchnia próbki w m2
+    %S=0.28*1e-4 --> powierzchnia próbki w m2
     %aby mieæ dobre jednoski dla Io/S, w [mA/cm2] muszê pomno¿yæ moje wyniki
     %które równaj¹ siê Io/(qS) przez q, uzyskam jednostki A/m2, muszê
     %jeszcze zamieniæ m2 na cm2 czyli pomno¿yæ wszystko przez 1e-4 i aby
