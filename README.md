@@ -1,4 +1,4 @@
-# Effective mobility in polycryatallice materials: grain boundaries
+# Effective mobility in polycrystalline materials: grain boundaries
 Script in matlab which calculate effective mobility in a policrystalline structure.
 
 The calculations are based on the:
